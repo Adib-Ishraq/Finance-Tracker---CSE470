@@ -24,4 +24,4 @@ def set_budget():
     if current_budget:
         form.amount.data = current_budget.amount
 
-    return render_template('set_budget.html', form=form, budget=current_budget)
+    return render_template('budgets/set_budget.html', form=form, budget=current_budget)

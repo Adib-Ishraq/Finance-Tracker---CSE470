@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, render_template
 from flask_login import login_required, current_user
 from models import db, Transaction, RecurringExpense
 from datetime import datetime, timedelta
@@ -6,6 +6,13 @@ import requests
 import json
 
 bank = Blueprint('bank', __name__)
+
+@bank.route('/connect-bank')
+@login_required
+def connect_bank_view():
+    # Get connected banks for the user
+    connected_banks = []  # In a real app, would fetch from the database
+    return render_template('bank_integration/bank_integration.html', connected_banks=connected_banks)
 
 # Mock bank API endpoints
 MOCK_BANK_API = {
@@ -184,4 +191,4 @@ def manage_recurring_expense(expense_id):
     expense.is_active = data.get('is_active', expense.is_active)
     
     db.session.commit()
-    return jsonify({"message": "Recurring expense updated successfully"}) 
+    return jsonify({"message": "Recurring expense updated successfully"})

@@ -231,7 +231,7 @@ def show_notifications():
         .order_by(Notification.created_at.desc())\
         .limit(10).all()
     
-    return render_template('notifications.html', settings=settings, notifications=user_notifications)
+    return render_template('notifications/notifications.html', settings=settings, notifications=user_notifications)
 
 @notifications.route('/notifications/update', methods=['POST'])
 @login_required

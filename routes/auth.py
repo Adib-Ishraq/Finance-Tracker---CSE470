@@ -23,7 +23,7 @@ def register():
         existing_user = User.query.filter_by(email=form.email.data).first()
         if existing_user:
             flash('Email already exists. Please use a different email address.', 'danger')
-            return render_template('register.html', form=form)
+            return render_template('auth/register.html', form=form)
             
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         new_user = User(
@@ -35,7 +35,7 @@ def register():
         db.session.commit()
         flash('Account created successfully! Please login.', 'success')
         return redirect(url_for('auth.login'))
-    return render_template('register.html', form=form)
+    return render_template('auth/register.html', form=form)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -51,7 +51,7 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))
         else:
             flash('Invalid username or password', 'danger')
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 @auth.route('/logout')
 @login_required

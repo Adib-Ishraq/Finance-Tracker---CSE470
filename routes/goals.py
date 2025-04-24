@@ -11,7 +11,7 @@ goals = Blueprint('goals', __name__)
 @login_required
 def view_goals():
     goals = Goal.query.filter_by(user_id=current_user.id).all()
-    return render_template('goals.html', goals=goals)
+    return render_template('goals/goals.html', goals=goals)
 
 @goals.route('/goals/add', methods=['GET', 'POST'])
 @login_required
@@ -29,7 +29,7 @@ def add_goal():
         db.session.commit()
         flash('New financial goal created!', 'success')
         return redirect(url_for('goals.view_goals'))
-    return render_template('add_goal.html', form=form)
+    return render_template('goals/add_goal.html', form=form)
 
 @goals.route('/goals/<int:goal_id>')
 @login_required
@@ -39,7 +39,7 @@ def view_goal(goal_id):
         flash('Access denied', 'danger')
         return redirect(url_for('goals.view_goals'))
     form = ContributeForm()
-    return render_template('goal_detail.html', goal=goal, form=form)
+    return render_template('goals/goal_detail.html', goal=goal, form=form)
 
 @goals.route('/goals/<int:goal_id>/contribute', methods=['POST'])
 @login_required
@@ -93,7 +93,7 @@ def edit_goal(goal_id):
         flash('Goal updated successfully!', 'success')
         return redirect(url_for('goals.view_goal', goal_id=goal.id))
 
-    return render_template('edit_goals.html', form=form, goal=goal)
+    return render_template('goals/edit_goals.html', form=form, goal=goal)
 
 @goals.route('/goals/<int:goal_id>/delete', methods=['POST'])
 @login_required
@@ -201,4 +201,4 @@ def goal_suggestions():
     }
     suggestions.append(retirement_suggestion)
 
-    return render_template('goal_suggestions.html', suggestions=suggestions)
+    return render_template('goals/goal_suggestions.html', suggestions=suggestions)

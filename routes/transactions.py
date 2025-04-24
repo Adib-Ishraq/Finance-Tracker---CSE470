@@ -23,7 +23,7 @@ def add_transaction():
         db.session.commit()
         flash('Transaction added successfully!', 'success')
         return redirect(url_for('main.dashboard'))
-    return render_template('add_transaction.html', form=form)
+    return render_template('transactions/add_transaction.html', form=form)
 
 @transactions.route('/edit_transaction/<int:transaction_id>', methods=['GET', 'POST'])
 @login_required
@@ -47,7 +47,7 @@ def edit_transaction(transaction_id):
         flash('Transaction updated successfully!', 'success')
         return redirect(url_for('transactions.filter_transactions'))
     
-    return render_template('edit_transaction.html', form=form, transaction=transaction)
+    return render_template('transactions/edit_transaction.html', form=form, transaction=transaction)
 
 @transactions.route('/delete_transaction/<int:transaction_id>', methods=['POST'])
 @login_required
@@ -83,7 +83,7 @@ def filter_transactions():
     )
 
     return render_template(
-        'transactions.html',
+        'transactions/transactions.html',
         transactions=transactions,
         categories=categories,
         selected_category=category,
@@ -163,7 +163,7 @@ def budget_summary():
     spending_trend = ((last_month_expenses - total_expenses) / last_month_expenses) * 100 if last_month_expenses > 0 else 0
     
     return render_template(
-        'budget_summary.html',
+        'budgets/budget_summary.html',
         budget_amount=budget_amount,
         total_expenses=total_expenses,
         remaining_budget=remaining_budget,
