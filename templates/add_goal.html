@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="text-center mb-4">Create New Financial Goal</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control", placeholder="e.g., Emergency Fund, New Car, Vacation") }}
+                        {% if form.name.errors %}
+                            {% for error in form.name.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.target_amount.label(class="form-label") }}
+                        {{ form.target_amount(class="form-control", placeholder="0.00") }}
+                        {% if form.target_amount.errors %}
+                            {% for error in form.target_amount.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.current_amount.label(class="form-label") }}
+                        {{ form.current_amount(class="form-control", placeholder="0.00") }}
+                        <small class="form-text text-muted">How much have you already saved toward this goal?</small>
+                        {% if form.current_amount.errors %}
+                            {% for error in form.current_amount.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.deadline.label(class="form-label") }}
+                        {{ form.deadline(class="form-control", type="date") }}
+                        <small class="form-text text-muted">Optional: When do you want to achieve this goal?</small>
+                        {% if form.deadline.errors %}
+                            {% for error in form.deadline.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('goals.view_goals') }}" class="btn btn-secondary">Back to Goals</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5>Tips for Setting Financial Goals</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Be Specific:</strong> Define exactly what you're saving for to stay motivated.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Set Realistic Targets:</strong> Make sure your goal is achievable within your financial situation.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Add a Deadline:</strong> Setting a timeframe creates accountability and urgency.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Track Progress:</strong> Regular check-ins on your goal will help keep you on track.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Celebrate Milestones:</strong> Reward yourself when you hit 25%, 50%, and 75% of your goal.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

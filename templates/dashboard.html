@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Welcome, {{ current_user.username }}</h2>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Current Balance</h5>
+                    <h3 class="text-{{ 'success' if balance >= 0 else 'danger' }}">
+                        ${{ "%.2f"|format(balance) }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Budget</h5>
+                    <h3>${{ "%.2f"|format(budget.amount) if budget else "Not Set" }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Remaining Budget</h5>
+                    <h3 class="text-{{ 'success' if remaining_budget >= 0 else 'danger' }}">
+                        ${{ "%.2f"|format(remaining_budget) if budget else "N/A" }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-primary">Add Transaction</a>
+                <a href="{{ url_for('budgets.set_budget') }}" class="btn btn-secondary">Set Budget</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h3>Recent Transactions</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                            <tr>
+                                <td>{{ transaction.type }}</td>
+                                <td>{{ transaction.category }}</td>
+                                <td class="text-{{ 'success' if transaction.type == 'Income' else 'danger' }}">
+                                    ${{ "%.2f"|format(transaction.amount) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% if goals %}
+<div class="row mt-4">
+    <div class="col">
+        <h3>Your Financial Goals</h3>
+        <div class="row">
+            {% for goal in goals %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ goal.name }}</h5>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: {{ goal.progress_percentage }}%"
+                                aria-valuenow="{{ goal.progress_percentage }}"
+                                aria-valuemin="0" aria-valuemax="100">
+                                {{ goal.progress_percentage }}%
+                            </div>
+                        </div>
+                        <p class="card-text">
+                            ${{ "%.2f"|format(goal.current_amount) }} of ${{ "%.2f"|format(goal.target_amount) }}
+                        </p>
+                        <a href="{{ url_for('goals.view_goal', goal_id=goal.id) }}" class="btn btn-sm btn-primary">View</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

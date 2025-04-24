@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center py-5 mb-5" style="background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%); color: white; border-radius: 15px; padding: 4rem 2rem;">
+    <h1 class="display-4 fw-bold mb-4">Take Control of Your Financial Future</h1>
+    <p class="lead mb-4">Track expenses, set budgets, and achieve your financial goals with our comprehensive personal finance manager.</p>
+    <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4">Get Started</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">Sign In</a>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-chart-line fa-3x text-primary"></i>
+                </div>
+                <h3 class="h5 mb-3">Track Expenses</h3>
+                <p class="text-muted">Monitor your spending habits and identify areas where you can save money.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-piggy-bank fa-3x text-success"></i>
+                </div>
+                <h3 class="h5 mb-3">Set Budgets</h3>
+                <p class="text-muted">Create and manage budgets to keep your spending in check.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-bullseye fa-3x text-danger"></i>
+                </div>
+                <h3 class="h5 mb-3">Achieve Goals</h3>
+                <p class="text-muted">Set and track financial goals to build your future wealth.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Why Choose Us Section -->
+<div class="row align-items-center mb-5">
+    <div class="col-lg-6">
+        <h2 class="mb-4">Why Choose Our Finance Manager?</h2>
+        <ul class="list-unstyled">
+            <li class="mb-3">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong>Easy to Use</strong> - Intuitive interface designed for everyone
+            </li>
+            <li class="mb-3">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong>Secure</strong> - Your financial data is protected
+            </li>
+            <li class="mb-3">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong>Comprehensive</strong> - All-in-one solution for personal finance
+            </li>
+            <li class="mb-3">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong>Real-time Updates</strong> - Stay on top of your finances
+            </li>
+        </ul>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="h4 mb-4">Ready to Start?</h3>
+                <p class="mb-4">Join thousands of users who are already managing their finances better.</p>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg w-100">Create Free Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .hero-section {
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.1);
+        z-index: 1;
+    }
+    
+    .hero-section > * {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}

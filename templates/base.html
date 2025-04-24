@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Manager</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('auth.home') }}">Finance Manager</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+                        
+                        <!-- Transactions & Budget Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="transactionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Transactions & Budget
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="transactionDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.filter_transactions') }}">Transactions</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('budgets.set_budget') }}">Set Budget</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.add_transaction') }}">Add Transaction</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.budget_summary') }}">Budget Summary</a></li>
+                            </ul>
+                        </li>
+                        
+                        <!-- Goals Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="goalsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Goals
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="goalsDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('goals.add_goal') }}">Add Goal</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.view_goals') }}">View Goals</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.goal_suggestions') }}">Goal Suggestions</a></li>
+                            </ul>
+                        </li>
+                        
+                        <!-- Notifications Link -->
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('notifications.show_notifications') }}">Notifications</a></li>
+                        
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+ <script>
+        // Check for goal reminders - add this to all pages
+        function checkGoalReminders() {
+            fetch('/api/goal-reminders')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.reminders && data.reminders.length > 0) {
+                        // Create and show notifications
+                        const container = document.createElement('div');
+                        container.className = 'position-fixed bottom-0 end-0 p-3';
+                        container.style.zIndex = '1050';
+
+                        data.reminders.forEach(reminder => {
+                            const toast = document.createElement('div');
+                            toast.className = 'toast show';
+                            toast.innerHTML = `
+                                <div class="toast-header bg-warning text-dark">
+                                    <strong class="me-auto">Goal Reminder</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                                </div>
+                                <div class="toast-body">
+                                    <p><strong>${reminder.name}</strong> is due in ${reminder.days_left} days!</p>
+                                    <p>You still need $${reminder.amount_needed.toFixed(2)} to reach your goal.</p>
+                                    <div class="mt-2 pt-2 border-top">
+                                        <a href="/goals/${reminder.id}" class="btn btn-sm btn-primary">View Goal</a>
+                                    </div>
+                                </div>
+                            `;
+                            container.appendChild(toast);
+                        });
+
+                        document.body.appendChild(container);
+
+                        // Add event listeners to close buttons
+                        const closeButtons = container.querySelectorAll('.btn-close');
+                        closeButtons.forEach(button => {
+                            button.addEventListener('click', function() {
+                                const toast = this.closest('.toast');
+                                if (toast) {
+                                    toast.remove();
+                                }
+                            });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error checking goal reminders:', error));
+        }
+
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkGoalReminders();
+        });
+    </script>
+</body>
+</html>

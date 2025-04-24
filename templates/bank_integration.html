@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Bank Integration</h2>
+
+    <!-- Connected Banks Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Connected Banks</h4>
+        </div>
+        <div class="card-body">
+            {% if connected_banks %}
+                <div class="list-group">
+                {% for bank in connected_banks %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">{{ bank.name }}</h5>
+                                <p class="mb-1">Account: ****{{ bank.last_four }}</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-danger btn-sm" onclick="disconnectBank('{{ bank.id }}')">
+                                    Disconnect
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No banks connected yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Connect New Bank Section -->
+    <div class="card">
+        <div class="card-header">
+            <h4>Connect New Bank</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('bank.connect_bank') }}">
+                <div class="mb-3">
+                    <label for="bank_name" class="form-label">Select Bank</label>
+                    <select class="form-select" id="bank_name" name="bank_name" required>
+                        <option value="">Choose a bank...</option>
+                        <option value="chase">Chase</option>
+                        <option value="bank_of_america">Bank of America</option>
+                        <option value="wells_fargo">Wells Fargo</option>
+                        <option value="citibank">Citibank</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="account_type" class="form-label">Account Type</label>
+                    <select class="form-select" id="account_type" name="account_type" required>
+                        <option value="checking">Checking</option>
+                        <option value="savings">Savings</option>
+                        <option value="credit">Credit Card</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Connect Bank</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function disconnectBank(bankId) {
+    if (confirm('Are you sure you want to disconnect this bank?')) {
+        fetch(`/bank/disconnect/${bankId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error disconnecting bank: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while disconnecting the bank');
+        });
+    }
+}
+</script>
+{% endblock %} 

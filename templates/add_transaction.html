@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="text-center mb-4">Add Transaction</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.type.label(class="form-label") }}
+                        {{ form.type(class="form-select") }}
+                        {% if form.type.errors %}
+                            {% for error in form.type.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.category.label(class="form-label") }}
+                        {{ form.category(class="form-control") }}
+                        {% if form.category.errors %}
+                            {% for error in form.category.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.amount.label(class="form-label") }}
+                        {{ form.amount(class="form-control", placeholder="0.00") }}
+                        {% if form.amount.errors %}
+                            {% for error in form.amount.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.date.label(class="form-label") }}
+                        {{ form.date(class="form-control", type="date") }}
+                        {% if form.date.errors %}
+                            {% for error in form.date.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5>Transaction Categories Suggestions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Income Categories</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-action">Salary</li>
+                            <li class="list-group-item list-group-item-action">Bonus</li>
+                            <li class="list-group-item list-group-item-action">Investment</li>
+                            <li class="list-group-item list-group-item-action">Freelance</li>
+                            <li class="list-group-item list-group-item-action">Gifts</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Expense Categories</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-action">Rent/Mortgage</li>
+                            <li class="list-group-item list-group-item-action">Groceries</li>
+                            <li class="list-group-item list-group-item-action">Utilities</li>
+                            <li class="list-group-item list-group-item-action">Transportation</li>
+                            <li class="list-group-item list-group-item-action">Entertainment</li>
+                            <li class="list-group-item list-group-item-action">Healthcare</li>
+                            <li class="list-group-item list-group-item-action">Shopping</li>
+                            <li class="list-group-item list-group-item-action">Dining Out</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small>Click on a category to use it in your transaction</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Make category suggestions clickable
+        const categoryInput = document.getElementById('category');
+        const categoryItems = document.querySelectorAll('.list-group-item');
+        
+        categoryItems.forEach(item => {
+            item.addEventListener('click', function() {
+                categoryInput.value = this.textContent;
+            });
+        });
+    });
+</script>
+{% endblock %}

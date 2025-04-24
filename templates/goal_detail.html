@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ goal.name }}</h2>
+            <div>
+                <a href="{{ url_for('goals.edit_goal', goal_id=goal.id) }}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteGoalModal">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h5>Target Amount</h5>
+                            <h2 class="text-primary">${{ "%.2f"|format(goal.target_amount) }}</h2>
+                        </div>
+                        <div class="mb-4">
+                            <h5>Current Progress</h5>
+                            <h2 class="text-success">${{ "%.2f"|format(goal.current_amount) }}</h2>
+                            <div class="progress mt-2" style="height: 20px;">
+                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: '{{ goal.progress_percentage }}'"
+                                     aria-valuenow="{{ goal.progress_percentage }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ goal.progress_percentage }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5>Amount Still Needed</h5>
+                            <h2 class="text-danger">${{ "%.2f"|format(goal.target_amount - goal.current_amount) }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        {% if goal.deadline %}
+                            <div class="mb-4">
+                                <h5>Deadline</h5>
+                                <p class="fs-5">{{ goal.deadline.strftime('%B %d, %Y') }}</p>
+                                <p class="{% if goal.days_remaining < 7 %}text-danger{% elif goal.days_remaining < 30 %}text-warning{% else %}text-muted{% endif %}">
+                                    {% if goal.days_remaining > 0 %}
+                                        {{ goal.days_remaining }} days remaining
+                                    {% else %}
+                                        Deadline passed
+                                    {% endif %}
+                                </p>
+                            </div>
+                        {% endif %}
+                        <div class="mb-4">
+                            <h5>Created</h5>
+                            <p>{{ goal.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                        
+                        {% if goal.days_remaining and goal.target_amount > goal.current_amount %}
+                            <div class="alert {{ 'alert-warning' if goal.days_remaining < 30 else 'alert-info' }}">
+                                <h6>Savings Plan</h6>
+                                <p>To reach your goal by the deadline, you need to save:</p>
+                                <p class="fw-bold">
+                                    ${{ "%.2f"|format((goal.target_amount - goal.current_amount) / goal.days_remaining) }} per day
+                                </p>
+                                <p class="fw-bold">
+                                    ${{ "%.2f"|format((goal.target_amount - goal.current_amount) / (goal.days_remaining / 7)) }} per week
+                                </p>
+                                <p class="fw-bold">
+                                    ${{ "%.2f"|format((goal.target_amount - goal.current_amount) / (goal.days_remaining / 30)) }} per month
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Add Contribution</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('goals.contribute_to_goal', goal_id=goal.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.amount(class="form-control form-control-lg", placeholder="Amount to add") }}
+                            </div>
+                            {% if form.amount.errors %}
+                                {% for error in form.amount.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                {{ form.submit(class="btn btn-success btn-lg") }}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('goals.view_goals') }}" class="btn btn-secondary">Back to Goals</a>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteGoalModal" tabindex="-1" aria-labelledby="deleteGoalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteGoalModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the goal <strong>{{ goal.name }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('goals.delete_goal', goal_id=goal.id) }}">
+                    <button type="submit" class="btn btn-danger">Delete Goal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

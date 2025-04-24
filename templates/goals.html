@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Financial Goals</h2>
+            <p>Create and track your savings goals here.</p>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('goals.add_goal') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Goal
+            </a>
+            <a href="{{ url_for('goals.goal_suggestions') }}" class="btn btn-outline-primary">
+                <i class="bi bi-lightbulb"></i> Goal Suggestions
+            </a>
+        </div>
+    </div>
+
+    {% if goals %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for goal in goals %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ goal.name }}</h5>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: {{ goal.progress_percentage }}%"
+                                    aria-valuenow="{{ goal.progress_percentage }}"
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    {{ goal.progress_percentage }}%
+                                </div>
+                            </div>
+                            <p class="card-text">
+                                <strong>Target:</strong> ${{ "%.2f"|format(goal.target_amount) }}<br>
+                                <strong>Saved:</strong> ${{ "%.2f"|format(goal.current_amount) }}<br>
+                                <strong>Remaining:</strong> ${{ "%.2f"|format(goal.target_amount - goal.current_amount) }}
+                            </p>
+                            {% if goal.deadline %}
+                                <p class="card-text {% if goal.days_remaining < 7 %}text-danger{% endif %}">
+                                    <strong>Deadline:</strong> {{ goal.deadline.strftime('%Y-%m-%d') }}
+                                    ({{ goal.days_remaining }} days left)
+                                </p>
+                            {% endif %}
+                            <a href="{{ url_for('goals.view_goal', goal_id=goal.id) }}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>You don't have any financial goals yet. <a href="{{ url_for('goals.add_goal') }}">Create your first goal</a> to start saving!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

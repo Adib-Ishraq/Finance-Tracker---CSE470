@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Budget Summary</h2>
+        <p class="text-muted">View your current month's budget status and spending by category.</p>
+    </div>
+    <div class="col text-end">
+        <a href="{{ url_for('budgets.set_budget') }}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil"></i> Adjust Budget
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Monthly Budget Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <h4 class="mb-0">${{ "%.2f"|format(budget_amount) }}</h4>
+                        <small class="text-muted">Total Budget</small>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 text-danger">${{ "%.2f"|format(total_expenses) }}</h4>
+                        <small class="text-muted">Total Spent</small>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 {% if remaining_budget >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            ${{ "%.2f"|format(remaining_budget) }}
+                        </h4>
+                        <small class="text-muted">Remaining</small>
+                    </div>
+                </div>
+                
+                <div class="progress mb-4" style="height: 25px;">
+                    <div class="progress-bar 
+                            {% if budget_percentage < 50 %}bg-success
+                            {% elif budget_percentage < 80 %}bg-warning
+                            {% else %}bg-danger{% endif %}" 
+                         role="progressbar" 
+                         style="width: {% if budget_percentage > 100 %}100{% else %}{{ budget_percentage }}{% endif %}%" 
+                         aria-valuenow="{{ budget_percentage }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        {{ "%.1f"|format(budget_percentage) }}% Used
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <h5>vs. Last Month</h5>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <h3>
+                            <i class="bi {% if spending_trend > 0 %}bi-arrow-down text-success{% elif spending_trend < 0 %}bi-arrow-up text-danger{% else %}bi-arrow-right text-secondary{% endif %}"></i>
+                        </h3>
+                        <span class="{% if spending_trend > 0 %}text-success{% elif spending_trend < 0 %}text-danger{% else %}text-secondary{% endif %} ms-2">
+                            {% if spending_trend != 0 %}
+                                {{ "%.1f"|format(abs(spending_trend)) }}% 
+                                {% if spending_trend > 0 %}
+                                    Less Spending
+                                {% else %}
+                                    More Spending
+                                {% endif %}
+                            {% else %}
+                                Same Spending
+                            {% endif %}
+                        </span>
+                    </div>
+                    <small class="text-muted">Last Month: ${{ "%.2f"|format(last_month_expenses) }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Budget Timeline</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="budgetTimeline" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Spending by Category</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-5">
+                <canvas id="categoryChart" height="300"></canvas>
+            </div>
+            <div class="col-md-7">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>% of Budget</th>
+                                <th>Chart</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in category_expenses %}
+                            <tr>
+                                <td>{{ expense.category }}</td>
+                                <td>${{ "%.2f"|format(expense.total) }}</td>
+                                <td>{{ "%.1f"|format((expense.total / budget_amount) * 100) if budget_amount > 0 else 0 }}%</td>
+                                <td>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                            style="width: {{ (expense.total / budget_amount) * 100 if budget_amount > 0 else 0 }}%"
+                                            aria-valuenow="{{ (expense.total / budget_amount) * 100 if budget_amount > 0 else 0 }}"
+                                            aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Budget Recommendations</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% if budget_percentage > 90 %}
+                <div class="col-md-12">
+                    <div class="alert alert-danger">
+                        <h5><i class="bi bi-exclamation-triangle-fill"></i> Budget Alert</h5>
+                        <p>You've used {{ "%.1f"|format(budget_percentage) }}% of your monthly budget. Consider reducing non-essential spending for the rest of the month.</p>
+                    </div>
+                </div>
+            {% elif budget_percentage > 75 %}
+                <div class="col-md-12">
+                    <div class="alert alert-warning">
+                        <h5><i class="bi bi-exclamation-circle"></i> Budget Warning</h5>
+                        <p>You've used {{ "%.1f"|format(budget_percentage) }}% of your monthly budget. Be mindful of your spending for the rest of the month.</p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if not budget_amount %}
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-info-circle"></i> Budget Tip</h5>
+                        <p>You haven't set a budget yet. <a href="{{ url_for('budgets.set_budget') }}">Set a monthly budget</a> to track your spending more effectively.</p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% for expense in category_expenses %}
+                {% if budget_amount > 0 and (expense.total / budget_amount) * 100 > 25 %}
+                    <div class="col-md-6 mb-3">
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-lightbulb"></i> {{ expense.category }} Spending</h5>
+                            <p>Your {{ expense.category }} spending makes up {{ "%.1f"|format((expense.total / budget_amount) * 100) }}% of your total budget. Consider if you can optimize this category.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Category chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for expense in category_expenses %}'{{ expense.category }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for expense in category_expenses %}{{ expense.total }},{% endfor %}],
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                        '#FF9F40', '#C9CBCF', '#7CDDDD', '#B6D884', '#FF8A80'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+        
+        // Budget timeline chart
+        const timelineCtx = document.getElementById('budgetTimeline').getContext('2d');
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+                labels: ['Day 1', 'Day 5', 'Day 10', 'Day 15', 'Day 20', 'Day 25', 'Today'],
+                datasets: [{
+                    label: 'Ideal Pace',
+                    data: [
+                        0, 
+                        {{ budget_amount * 0.17 }},
+                        {{ budget_amount * 0.33 }},
+                        {{ budget_amount * 0.5 }},
+                        {{ budget_amount * 0.67 }},
+                        {{ budget_amount * 0.83 }},
+                        {{ budget_amount }}
+                    ],
+                    borderColor: '#36A2EB',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    borderDash: [5, 5],
+                    fill: false
+                }, {
+                    label: 'Actual Spending',
+                    data: [
+                        0,
+                        {{ total_expenses * 0.2 }},
+                        {{ total_expenses * 0.35 }},
+                        {{ total_expenses * 0.55 }},
+                        {{ total_expenses * 0.75 }},
+                        {{ total_expenses * 0.9 }},
+                        {{ total_expenses }}
+                    ],
+                    borderColor: '#FF6384',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
