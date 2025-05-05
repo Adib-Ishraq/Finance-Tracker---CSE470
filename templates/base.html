@@ -51,6 +51,46 @@
         .navbar-dark .navbar-nav .nav-link:hover {
             color: rgba(255, 255, 255, 0.8);
         }
+        
+        /* Footer styles */
+        .footer {
+            background: linear-gradient(135deg, #333899, #9370DB, #6a5acd);
+            color: white;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-bs-theme="dark"] .footer {
+            background: linear-gradient(135deg, #333899, #5d4bb6, #45389c);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .footer a {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        
+        .footer a:hover {
+            color: white !important;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .footer .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        .footer .social-icon {
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .footer .social-icon:hover {
+            transform: translateY(-3px);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+        }
+        
+        .footer hr {
+            opacity: 0.1;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -248,5 +288,41 @@
                 .catch(error => console.error('Error checking goal reminders:', error));
         }
     </script>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Logo and copyright -->
+                <div class="col-md-4 mb-2 mb-md-0 text-center text-md-start">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                        <i class="bi bi-piggy-bank-fill me-2"></i>
+                        <span class="fw-bold">Finance Tracker</span>
+                    </div>
+                    <p class="small mb-0 mt-1">© 2025 All rights reserved.</p>
+                </div>
+                
+                <!-- Quick links -->
+                <div class="col-md-5 mb-2 mb-md-0">
+                    <div class="d-flex justify-content-center justify-content-md-start gap-3">
+                        <a href="{{ url_for('main.dashboard') }}" class="text-decoration-none small">Dashboard</a>
+                        <a href="{{ url_for('transactions.filter_transactions') }}" class="text-decoration-none small">Transactions</a>
+                        <a href="{{ url_for('goals.view_goals') }}" class="text-decoration-none small">Goals</a>
+                        <a href="#" class="text-decoration-none small">Help</a>
+                    </div>
+                </div>
+                
+                <!-- Social links -->
+                <div class="col-md-3 text-center text-md-end">
+                    <div class="d-flex gap-3 justify-content-center justify-content-md-end">
+                        <a href="#" class="text-decoration-none"><i class="bi bi-facebook social-icon"></i></a>
+                        <a href="#" class="text-decoration-none"><i class="bi bi-twitter-x social-icon"></i></a>
+                        <a href="#" class="text-decoration-none"><i class="bi bi-instagram social-icon"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
