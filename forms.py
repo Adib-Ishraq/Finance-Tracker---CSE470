@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, DecimalField, SelectField, DateField
+from wtforms import StringField, PasswordField, SubmitField, DecimalField, SelectField, DateField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo, Email
 from datetime import datetime
 
@@ -36,3 +36,53 @@ class GoalForm(FlaskForm):
 class ContributeForm(FlaskForm):
     amount = DecimalField('Contribution Amount', validators=[InputRequired()])
     submit = SubmitField('Add Contribution')
+
+# Investment Forms
+class InvestmentAccountForm(FlaskForm):
+    name = StringField('Account Name', validators=[InputRequired(), Length(max=100)])
+    account_type = SelectField('Account Type', choices=[
+        ('Brokerage', 'Brokerage'),
+        ('IRA', 'IRA'),
+        ('401k', '401(k)'),
+        ('Roth_IRA', 'Roth IRA'),
+        ('Crypto_Wallet', 'Crypto Wallet'),
+        ('Other', 'Other')
+    ], validators=[InputRequired()])
+    description = TextAreaField('Description', validators=[Length(max=255)])
+    submit = SubmitField('Save Account')
+
+class InvestmentForm(FlaskForm):
+    name = StringField('Investment Name', validators=[InputRequired(), Length(max=100)])
+    symbol = StringField('Symbol/Ticker', validators=[Length(max=20)])
+    investment_type = SelectField('Investment Type', choices=[
+        ('stock', 'Stock'),
+        ('crypto', 'Cryptocurrency'),
+        ('mutual_fund', 'Mutual Fund'),
+        ('etf', 'ETF'),
+        ('bond', 'Bond'),
+        ('other', 'Other')
+    ], validators=[InputRequired()])
+    risk_category = SelectField('Risk Category', choices=[
+        ('low_risk', 'Low Risk'),
+        ('medium_risk', 'Medium Risk'),
+        ('high_risk', 'High Risk')
+    ], validators=[InputRequired()])
+    initial_investment = DecimalField('Initial Investment ($)', validators=[InputRequired()])
+    quantity = DecimalField('Quantity', validators=[InputRequired()], default=1.0)
+    purchase_date = DateField('Purchase Date', validators=[InputRequired()], default=datetime.utcnow)
+    current_value = DecimalField('Current Value ($)', validators=[InputRequired()])
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Save Investment')
+
+# Debt Forms
+class DebtForm(FlaskForm):
+    type = SelectField('Type', choices=[('Debt', 'Debt (I Owe)'), ('Loan', 'Loan (Lent Out)')], validators=[InputRequired()])
+    person = StringField('Person', validators=[InputRequired(), Length(max=100)])
+    amount = DecimalField('Amount', validators=[InputRequired()])
+    debt_date = DateField('Debt/Loan Date', validators=[InputRequired()], default=datetime.utcnow)
+    repayment_date = DateField('Repayment Date', validators=[InputRequired()])
+    submit = SubmitField('Add Debt/Loan')
+
+class DebtPaymentForm(FlaskForm):
+    amount_paid = DecimalField('Amount Paid', validators=[InputRequired()])
+    submit = SubmitField('Add Payment')

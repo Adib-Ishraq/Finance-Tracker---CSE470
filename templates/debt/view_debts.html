@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>All Debts</h2>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Person</th>
+      <th>Total Amount</th>
+      <th>Paid</th>
+      <th>Outstanding</th>
+      <th>Debt/Loan Date</th>
+      <th>Repayment Date</th>
+      <th>Action</th> <!-- Add Action header for the Delete button -->
+    </tr>
+  </thead>
+  <tbody>
+    {% for debt in debts %}
+    <tr>
+      <td>{{ debt.type }}</td>
+      <td>{{ debt.person }}</td>
+      <td>${{ "%.2f"|format(debt.amount) }}</td>
+      <td>${{ "%.2f"|format(debt.paid) }}</td>
+      <td>${{ "%.2f"|format(debt.outstanding) }}</td>
+      <td>{{ debt.debt_date.strftime('%Y-%m-%d') }}</td>
+      <td>{{ debt.repayment_date.strftime('%Y-%m-%d') if debt.repayment_date else 'N/A' }}</td>
+
+      <td>
+        <a href="{{ url_for('debts.add_payment', debt_id=debt.id) }}" class="btn btn-sm btn-primary">Add Payment</a>
+        <a href="{{ url_for('debts.debt_history') }}" class="btn btn-sm btn-secondary">History</a>
+
+        <!-- Delete Button -->
+        <a href="{{ url_for('debts.delete_debt', debt_id=debt.id) }}" class="btn btn-sm btn-danger" 
+           onclick="return confirm('Are you sure you want to delete this debt?')">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>All Loans</h2>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Person</th>
+      <th>Total Amount</th>
+      <th>Paid</th>
+      <th>Outstanding</th>
+      <th>Loan Date</th>
+      <th>Repayment Date</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for loan in loans %}
+    <tr>
+      <td>{{ loan.type }}</td>
+      <td>{{ loan.person }}</td>
+      <td>${{ "%.2f"|format(loan.amount) }}</td>
+      <td>${{ "%.2f"|format(loan.paid) }}</td>
+      <td>${{ "%.2f"|format(loan.outstanding) }}</td>
+      <td>{{ loan.debt_date.strftime('%Y-%m-%d') }}</td>
+      <td>{{ loan.repayment_date.strftime('%Y-%m-%d') if loan.repayment_date else 'N/A' }}</td>
+
+      <td>
+        <a href="{{ url_for('debts.add_payment', debt_id=loan.id) }}" class="btn btn-sm btn-primary">Add Payment</a>
+        <a href="{{ url_for('debts.debt_history') }}" class="btn btn-sm btn-secondary">History</a>
+
+        <!-- Delete Button -->
+        <a href="{{ url_for('debts.delete_debt', debt_id=loan.id) }}" class="btn btn-sm btn-danger"
+           onclick="return confirm('Are you sure you want to delete this loan?')">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="mt-4">
+  <a href="{{ url_for('debts.add_debt') }}" class="btn btn-success">Add New Debt/Loan</a>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <h2 class="text-center mb-4">Add Debt/Loan</h2>
+    
+    <div class="card">
+      <div class="card-body">
+        <form method="POST">
+          {{ form.hidden_tag() }}
+          
+          <div class="mb-3">
+            {{ form.type.label(class="form-label") }}
+            {{ form.type(class="form-select") }}
+            {% if form.type.errors %}
+              {% for error in form.type.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            {{ form.person.label(class="form-label") }}
+            {{ form.person(class="form-control", placeholder="Enter name or organization") }}
+            {% if form.person.errors %}
+              {% for error in form.person.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            {{ form.amount.label(class="form-label") }}
+            {{ form.amount(class="form-control", placeholder="0.00") }}
+            {% if form.amount.errors %}
+              {% for error in form.amount.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            {{ form.debt_date.label(class="form-label") }}
+            {{ form.debt_date(class="form-control", type="date") }}
+            {% if form.debt_date.errors %}
+              {% for error in form.debt_date.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            {{ form.repayment_date.label(class="form-label") }}
+            {{ form.repayment_date(class="form-control", type="date") }}
+            {% if form.repayment_date.errors %}
+              {% for error in form.repayment_date.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+          </div>
+          
+          <div class="d-grid">
+            {{ form.submit(class="btn btn-success") }}
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="text-center mt-3">
+      <a href="{{ url_for('debts.view_debts') }}" class="btn btn-secondary">Back to Debts</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

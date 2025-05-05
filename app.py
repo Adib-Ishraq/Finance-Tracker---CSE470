@@ -6,8 +6,6 @@ from flask_mail import Mail
 from config import Config
 from models import db, User
 from routes import register_blueprints
-from routes.notifications import notifications
-from routes.bank_integration import bank
 import os
 from dotenv import load_dotenv
 
@@ -45,8 +43,6 @@ def create_app(config_class=Config):
     
     # Register blueprints
     register_blueprints(app)
-    app.register_blueprint(notifications)
-    app.register_blueprint(bank)
     
     return app
 

@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<style>
+    .chart-container {
+        height: 350px;
+    }
+    .performance-metrics .card {
+        border-radius: 10px;
+        overflow: hidden;
+        border-top: 4px solid #9370DB;
+    }
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    .comparison-value {
+        font-size: 0.9rem;
+    }
+    .time-period-selector .btn-check:checked + .btn-outline-primary {
+        background-color: #9370DB;
+        border-color: #9370DB;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Portfolio Performance</h2>
+            <p class="text-muted">Analyze your investment performance over time</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('investments.investment_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <button class="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="bi bi-download"></i> Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Performance Summary -->
+    {% set total_invested = 0 %}
+    {% set total_current = 0 %}
+    {% set total_profit = 0 %}
+    {% set has_data = false %}
+    
+    {% if investment_types %}
+        {% for type_name, data in investment_types.items() %}
+            {% set total_invested = total_invested + data.total_invested %}
+            {% set total_current = total_current + data.total_value %}
+            {% set total_profit = total_profit + data.profit_loss %}
+            {% set has_data = true %}
+        {% endfor %}
+    {% endif %}
+    
+    {% set overall_return = 0 %}
+    {% if total_invested > 0 %}
+        {% set overall_return = (total_profit / total_invested * 100) %}
+    {% endif %}
+
+    <!-- Performance Metrics -->
+    <div class="row mb-4 performance-metrics">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Return</h6>
+                    <div class="metric-value {% if overall_return > 0 %}text-success{% elif overall_return < 0 %}text-danger{% else %}text-primary{% endif %}">
+                        {{ "%.2f"|format(overall_return|default(0)) }}%
+                    </div>
+                    <p class="comparison-value text-muted">
+                        On ${{ "%.2f"|format(total_invested|default(0)) }} invested
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Current Value</h6>
+                    <div class="metric-value text-primary">
+                        ${{ "%.2f"|format(total_current|default(0)) }}
+                    </div>
+                    <p class="comparison-value text-muted">
+                        Across all investments
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Profit/Loss</h6>
+                    <div class="metric-value {% if total_profit > 0 %}text-success{% elif total_profit < 0 %}text-danger{% else %}text-primary{% endif %}">
+                        ${{ "%.2f"|format(total_profit|default(0)) }}
+                    </div>
+                    <p class="comparison-value text-muted">
+                        Overall portfolio growth
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Investment Types</h6>
+                    <div class="metric-value text-primary">
+                        {{ investment_types|length|default(0) }}
+                    </div>
+                    <p class="comparison-value text-muted">
+                        Different asset classes
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Type Performance -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="m-0">Performance by Investment Type</h5>
+                </div>
+                <div class="card-body">
+                    {% if investment_types and investment_types|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Investment Type</th>
+                                    <th>Investments</th>
+                                    <th>Total Invested</th>
+                                    <th>Current Value</th>
+                                    <th>Gain/Loss</th>
+                                    <th>Return %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for type_name, data in investment_types.items() %}
+                                    {% set type_return = 0 %}
+                                    {% if data.total_invested > 0 %}
+                                        {% set type_return = (data.profit_loss / data.total_invested * 100) %}
+                                    {% endif %}
+                                    <tr>
+                                        <td>{{ type_name|replace('_', ' ')|title }}</td>
+                                        <td>{{ data.count }}</td>
+                                        <td>${{ "%.2f"|format(data.total_invested) }}</td>
+                                        <td>${{ "%.2f"|format(data.total_value) }}</td>
+                                        <td class="{% if data.profit_loss > 0 %}text-success{% elif data.profit_loss < 0 %}text-danger{% endif %}">
+                                            ${{ "%.2f"|format(data.profit_loss) }}
+                                        </td>
+                                        <td class="{% if type_return > 0 %}text-success{% elif type_return < 0 %}text-danger{% endif %}">
+                                            {{ "%.2f"|format(type_return) }}%
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center p-4">
+                        <p class="text-muted">No investment performance data available</p>
+                        <a href="{{ url_for('investments.add_account') }}" class="btn btn-primary">
+                            Add Investment Account
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Details -->
+    {% if investment_types and investment_types|length > 0 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="m-0">Investment Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="investmentDetailsAccordion">
+                        {% for type_name, data in investment_types.items() %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ loop.index }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" 
+                                        aria-controls="collapse{{ loop.index }}">
+                                    {{ type_name|replace('_', ' ')|title }} ({{ data.count }} investments)
+                                </button>
+                            </h2>
+                            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" 
+                                 aria-labelledby="heading{{ loop.index }}" data-bs-parent="#investmentDetailsAccordion">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Symbol</th>
+                                                    <th>Risk</th>
+                                                    <th>Invested</th>
+                                                    <th>Current</th>
+                                                    <th>Gain/Loss</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for investment in data.investments %}
+                                                <tr>
+                                                    <td>
+                                                        <a href="{{ url_for('investments.investment_detail', investment_id=investment.id) }}">
+                                                            {{ investment.name }}
+                                                        </a>
+                                                    </td>
+                                                    <td>{{ investment.symbol }}</td>
+                                                    <td>{{ investment.risk_category|replace('_', ' ')|title }}</td>
+                                                    <td>${{ "%.2f"|format(investment.initial_investment) }}</td>
+                                                    <td>${{ "%.2f"|format(investment.current_value) }}</td>
+                                                    <td class="{% if investment.profit_loss > 0 %}text-success{% elif investment.profit_loss < 0 %}text-danger{% endif %}">
+                                                        ${{ "%.2f"|format(investment.profit_loss) }}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Export Report Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Export Performance Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="reportFormat" class="form-label">Format</label>
+                        <select class="form-select" id="reportFormat">
+                            <option value="pdf">PDF</option>
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">Excel</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="timeRangeExport" class="form-label">Time Range</label>
+                        <select class="form-select" id="timeRangeExport">
+                            <option value="current">Current Selection</option>
+                            <option value="ytd">Year-to-Date</option>
+                            <option value="1y">Last 12 Months</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="includeBenchmark" checked>
+                        <label class="form-check-label" for="includeBenchmark">Include Benchmark Comparison</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Export Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

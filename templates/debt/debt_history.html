@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2 class="mb-4">Debt/Loan Payment History</h2>
+
+  {% if debts %}
+    {% set has_payments = false %}
+    
+    {% for debt in debts %}
+      {% if debt.id in payments and payments[debt.id]|length > 0 %}
+        {% set has_payments = true %}
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h4>{{ debt.type }} - {{ debt.person }}</h4>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <p><strong>Total Amount:</strong> ${{ "%.2f"|format(debt.amount) }}</p>
+              </div>
+              <div class="col-md-4">
+                <p><strong>Date:</strong> {{ debt.debt_date.strftime('%Y-%m-%d') }}</p>
+              </div>
+              <div class="col-md-4">
+                <p><strong>Outstanding:</strong> ${{ "%.2f"|format(debt.outstanding) }}</p>
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Payment Date</th>
+                    <th>Amount Paid</th>
+                    <th>Outstanding After Payment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for payment in payments[debt.id] %}
+                  <tr>
+                    <td>{{ payment.payment_date.strftime('%Y-%m-%d') }}</td>
+                    <td>${{ "%.2f"|format(payment.amount_paid) }}</td>
+                    <td>${{ "%.2f"|format(payment.outstanding) }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+    
+    {% if not has_payments %}
+      <div class="alert alert-info">
+        <p>You have debts/loans, but no payment history has been recorded yet.</p>
+        <p>Go to <a href="{{ url_for('debts.view_debts') }}">Debts & Loans</a> to make a payment.</p>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="alert alert-info">
+      <p>No debts or loans found. <a href="{{ url_for('debts.add_debt') }}">Add a debt or loan</a> to start tracking.</p>
+    </div>
+  {% endif %}
+
+  <div class="mt-4">
+    <a href="{{ url_for('debts.view_debts') }}" class="btn btn-secondary">Back to Debts</a>
+  </div>
+</div>
+{% endblock %}

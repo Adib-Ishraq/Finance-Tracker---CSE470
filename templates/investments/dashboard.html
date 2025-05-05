@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<style>
+    .asset-distribution {
+        height: 250px;
+    }
+    .account-card {
+        transition: transform 0.2s;
+    }
+    .account-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    }
+    .metric-card {
+        border-left: 4px solid #9370DB;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header and Action Buttons -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Investment Dashboard</h2>
+            <p>Track and manage your investment portfolio</p>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('investments.add_account') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Account
+            </a>
+            <a href="{{ url_for('investments.portfolio_performance') }}" class="btn btn-outline-primary">
+                <i class="bi bi-graph-up"></i> Performance Analysis
+            </a>
+        </div>
+    </div>
+    
+    <!-- Investment Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Portfolio Value</h6>
+                    <h3 class="card-title text-primary">${{ "%.2f"|format(total_current_value|default(0)) }}</h3>
+                    <p class="card-text {% if profit_percentage > 0 %}text-success{% elif profit_percentage < 0 %}text-danger{% endif %}">
+                        <i class="bi {% if profit_percentage > 0 %}bi-arrow-up{% elif profit_percentage < 0 %}bi-arrow-down{% else %}bi-dash{% endif %}"></i>
+                        {{ "%.2f"|format(profit_percentage|default(0)) }}% overall
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Invested</h6>
+                    <h3 class="card-title text-primary">${{ "%.2f"|format(total_invested|default(0)) }}</h3>
+                    <p class="card-text">Initial investment</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Accounts</h6>
+                    <h3 class="card-title text-primary">{{ accounts|length|default(0) }}</h3>
+                    <p class="card-text">Active investment accounts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card metric-card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Profit/Loss</h6>
+                    <h3 class="card-title {% if total_profit_loss > 0 %}text-success{% elif total_profit_loss < 0 %}text-danger{% else %}text-primary{% endif %}">
+                        ${{ "%.2f"|format(total_profit_loss|default(0)) }}
+                    </h3>
+                    <p class="card-text">Current performance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asset Allocation Chart -->
+    <div class="row mb-4">
+        <div class="col-md-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="m-0">Risk Allocation</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active">Value</button>
+                        <button class="btn btn-outline-secondary">Percentage</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="asset-distribution" id="riskAllocationChart">
+                        {% if not accounts or accounts|length == 0 or not risk_categories %}
+                        <div class="text-center h-100 d-flex align-items-center justify-content-center">
+                            <div>
+                                <p class="text-muted">No investment data available</p>
+                                <a href="{{ url_for('investments.add_account') }}" class="btn btn-sm btn-primary">
+                                    Add Your First Account
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="m-0">Risk Categories</h5>
+                </div>
+                <div class="card-body">
+                    {% if risk_categories %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Risk Level</th>
+                                    <th>Count</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category, data in risk_categories.items() %}
+                                <tr>
+                                    <td>{{ category }}</td>
+                                    <td>{{ data.count }}</td>
+                                    <td>${{ "%.2f"|format(data.total_value) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center h-100 d-flex align-items-center justify-content-center">
+                        <p class="text-muted">No risk data to display</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Investment Accounts -->
+    <h3 class="mb-3">Your Accounts</h3>
+    {% if accounts and accounts|length > 0 %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+            {% for account in accounts %}
+                <div class="col">
+                    <div class="card account-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title mb-3">{{ account.name }}</h5>
+                                <span class="badge bg-light text-dark">{{ account.account_type }}</span>
+                            </div>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ account.description }}</h6>
+                            <p class="card-text">
+                                <span class="fs-4">${{ "%.2f"|format(account.total_current_value|default(0)) }}</span>
+                                {% if account.total_invested_amount > 0 %}
+                                {% set account_return = ((account.total_current_value - account.total_invested_amount) / account.total_invested_amount * 100)|default(0) %}
+                                <span class="ms-2 badge {% if account_return > 0 %}bg-success{% elif account_return < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ "%.2f"|format(account_return) }}%
+                                </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('investments.edit_account', account_id=account.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a href="{{ url_for('investments.account_detail', account_id=account.id) }}" class="btn btn-sm btn-primary">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>You haven't added any investment accounts yet. <a href="{{ url_for('investments.add_account') }}">Add your first investment account</a> to start tracking your portfolio.</p>
+        </div>
+    {% endif %}
+    
+    <!-- Investment Tips -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="m-0">Investment Tips</h5>
+                    <button class="btn btn-sm btn-link text-decoration-none">Refresh</button>
+                </div>
+                <div class="card-body">
+                    <div id="investmentCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <h5>Diversification is Key</h5>
+                                <p>Spread your investments across different asset classes to reduce risk and maximize returns over time.</p>
+                            </div>
+                            <div class="carousel-item">
+                                <h5>Focus on Long-term Growth</h5>
+                                <p>Consider long-term investment strategies and avoid reacting to short-term market fluctuations.</p>
+                            </div>
+                            <div class="carousel-item">
+                                <h5>Retirement Accounts First</h5>
+                                <p>Maximize contributions to tax-advantaged retirement accounts before investing in taxable accounts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the investment tips carousel
+    var carouselElement = document.querySelector('#investmentCarousel');
+    if (carouselElement) {
+        var carousel = new bootstrap.Carousel(carouselElement, {
+            interval: 8000
+        });
+    }
+    
+    {% if risk_categories and risk_categories|length > 0 %}
+    // Risk Allocation Chart
+    var riskCtx = document.getElementById('riskAllocationChart');
+    if (riskCtx) {
+        // Prepare data for chart
+        var riskLabels = [];
+        var riskData = [];
+        var colors = [
+            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+            '#6f42c1', '#fd7e14', '#20c9a6', '#858796', '#5a5c69'
+        ];
+        
+        {% for category, data in risk_categories.items() %}
+            riskLabels.push('{{ category|replace("_", " ")|title }}');
+            riskData.push({{ data.total_value }});
+        {% endfor %}
+        
+        new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: riskLabels,
+                datasets: [{
+                    data: riskData,
+                    backgroundColor: colors.slice(0, riskLabels.length)
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.label || '';
+                                var value = context.raw || 0;
+                                var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                var percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return label + ': $' + value.toFixed(2) + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -19,20 +19,13 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True, nullable=False)
     two_factor_secret = db.Column(db.String(32), nullable=True)
     two_factor_enabled = db.Column(db.Boolean, default=False)
-    family_id = db.Column(db.Integer, db.ForeignKey('family.id'), nullable=True)
-    notification_preferences = db.Column(db.JSON, default={
-        'email_notifications': True,
-        'sms_notifications': False,
-        'weekly_reports': True,
-        'monthly_reports': True,
-        'bill_reminders': True,
-        'spending_alerts': True
-    })
     transactions = db.relationship('Transaction', backref='user', lazy=True)
     budget = db.relationship('Budget', backref='user', uselist=False)
     goals = db.relationship('Goal', backref='user', lazy=True)
     bills = db.relationship('Bill', backref='user', lazy=True)
     recurring_expenses = db.relationship('RecurringExpense', backref='user', lazy=True)
+    investment_accounts = db.relationship('InvestmentAccount', backref='user', lazy=True)
+    debts = db.relationship('Debt', backref='user', lazy=True)
 
     def generate_2fa_secret(self):
         self.two_factor_secret = pyotp.random_base32()
@@ -43,12 +36,6 @@ class User(db.Model, UserMixin):
             return False
         totp = pyotp.TOTP(self.two_factor_secret)
         return totp.verify(code)
-
-class Family(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    members = db.relationship('User', backref='family', lazy=True)
 
 class Bill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -154,3 +141,106 @@ class Goal(db.Model):
     @property
     def is_completed(self):
         return self.current_amount >= self.target_amount
+
+# Investment Models
+class InvestmentAccount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    account_type = db.Column(db.String(50), nullable=False)  # e.g., Brokerage, IRA, 401(k), etc.
+    description = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    investments = db.relationship('Investment', backref='account', lazy=True, cascade="all, delete-orphan")
+    
+    @property
+    def total_current_value(self):
+        return sum(investment.current_value for investment in self.investments)
+    
+    @property
+    def total_invested_amount(self):
+        return sum(investment.initial_investment for investment in self.investments)
+    
+    @property
+    def total_profit_loss(self):
+        return self.total_current_value - self.total_invested_amount
+    
+    @property
+    def total_profit_loss_percentage(self):
+        if self.total_invested_amount == 0:
+            return 0
+        return (self.total_profit_loss / self.total_invested_amount) * 100
+
+class Investment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    account_id = db.Column(db.Integer, db.ForeignKey('investment_account.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    symbol = db.Column(db.String(20), nullable=True)  # Stock/crypto ticker symbol
+    investment_type = db.Column(db.String(50), nullable=False)  # stock, crypto, mutual fund, etc.
+    risk_category = db.Column(db.String(50), nullable=False)  # high-risk, medium-risk, low-risk
+    initial_investment = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Float, nullable=False, default=1.0)
+    purchase_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    current_value = db.Column(db.Float, nullable=False)
+    last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    notes = db.Column(db.Text, nullable=True)
+    
+    @property
+    def profit_loss(self):
+        return self.current_value - self.initial_investment
+    
+    @property
+    def profit_loss_percentage(self):
+        if self.initial_investment == 0:
+            return 0
+        return (self.profit_loss / self.initial_investment) * 100
+    
+    @property
+    def current_price(self):
+        if self.quantity == 0:
+            return 0
+        return self.current_value / self.quantity
+
+# Debt Models
+class Debt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    type = db.Column(db.String(20), nullable=False)  # "Debt" (I owe) or "Loan" (lent out)
+    person = db.Column(db.String(100), nullable=False)  # Person to/from whom the debt/loan is related
+    amount = db.Column(db.Float, nullable=False)  # Total debt/loan amount
+    debt_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    repayment_date = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    payments = db.relationship('DebtPayment', backref='debt', lazy=True, cascade="all, delete-orphan")
+    
+    @property
+    def paid(self):
+        return sum(payment.amount_paid for payment in self.payments)
+    
+    @property
+    def outstanding(self):
+        return self.amount - self.paid
+
+
+class DebtPayment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    debt_id = db.Column(db.Integer, db.ForeignKey('debt.id'), nullable=False)
+    payment_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    amount_paid = db.Column(db.Float, nullable=False)
+    
+    @property
+    def outstanding(self):
+        # More efficient implementation to calculate outstanding amount after this payment
+        debt = Debt.query.get(self.debt_id)
+        if not debt:
+            return 0
+            
+        # Get all payments for this debt up to and including this payment
+        payments = DebtPayment.query.filter_by(debt_id=self.debt_id).filter(
+            DebtPayment.payment_date <= self.payment_date
+        ).all()
+        
+        # Sum all payments
+        total_paid = sum(payment.amount_paid for payment in payments)
+        
+        # Calculate remaining amount
+        return max(0, debt.amount - total_paid)

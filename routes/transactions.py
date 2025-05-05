@@ -75,6 +75,7 @@ def filter_transactions():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
+    # Make sure we're getting full Transaction objects, not tuples
     transactions = Transaction.get_transactions_by_category(
         current_user.id,
         category=category,

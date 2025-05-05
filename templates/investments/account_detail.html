@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<style>
+    .investment-card {
+        transition: transform 0.2s;
+    }
+    .investment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    }
+    .metric-card {
+        border-left: 4px solid #9370DB;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header with Account Info -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ account.name }}</h2>
+            <p class="text-muted">{{ account.description }}</p>
+            <div class="badge bg-light text-dark mb-2">{{ account.account_type }}</div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('investments.edit_account', account_id=account.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil"></i> Edit Account
+            </a>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+    
+    <!-- Account Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card metric-card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Value</h6>
+                    <h3 class="card-title text-primary">${{ "%.2f"|format(account.total_current_value|default(0)) }}</h3>
+                    {% if account.total_invested_amount > 0 %}
+                    {% set account_return = ((account.total_current_value - account.total_invested_amount) / account.total_invested_amount * 100)|default(0) %}
+                    <p class="card-text {% if account_return > 0 %}text-success{% elif account_return < 0 %}text-danger{% endif %}">
+                        <i class="bi {% if account_return > 0 %}bi-arrow-up{% elif account_return < 0 %}bi-arrow-down{% else %}bi-dash{% endif %}"></i>
+                        {{ "%.2f"|format(account_return) }}% overall
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card metric-card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Invested</h6>
+                    <h3 class="card-title text-primary">${{ "%.2f"|format(account.total_invested_amount|default(0)) }}</h3>
+                    <p class="card-text">Initial investment</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card metric-card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Profit/Loss</h6>
+                    {% set profit_loss = account.total_current_value - account.total_invested_amount %}
+                    <h3 class="card-title {% if profit_loss > 0 %}text-success{% elif profit_loss < 0 %}text-danger{% else %}text-primary{% endif %}">
+                        ${{ "%.2f"|format(profit_loss|default(0)) }}
+                    </h3>
+                    <p class="card-text">Current performance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Investments Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Investments</h3>
+                <a href="{{ url_for('investments.add_investment', account_id=account.id) }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Investment
+                </a>
+            </div>
+            
+            {% if account.investments and account.investments|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Risk</th>
+                                <th>Invested</th>
+                                <th>Current Value</th>
+                                <th>Return</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for investment in account.investments %}
+                            <tr>
+                                <td>
+                                    <strong>{{ investment.name }}</strong>
+                                    {% if investment.symbol %}<span class="text-muted">({{ investment.symbol }})</span>{% endif %}
+                                </td>
+                                <td>{{ investment.investment_type }}</td>
+                                <td><span class="badge bg-secondary">{{ investment.risk_category }}</span></td>
+                                <td>${{ "%.2f"|format(investment.initial_investment) }}</td>
+                                <td>${{ "%.2f"|format(investment.current_value) }}</td>
+                                <td>
+                                    {% if investment.initial_investment > 0 %}
+                                    {% set return_percent = ((investment.current_value - investment.initial_investment) / investment.initial_investment * 100)|default(0) %}
+                                    <span class="{% if return_percent > 0 %}text-success{% elif return_percent < 0 %}text-danger{% endif %}">
+                                        {{ "%.2f"|format(return_percent) }}%
+                                    </span>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('investments.edit_investment', investment_id=investment.id) }}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center p-5">
+                        <i class="bi bi-pie-chart fs-1 text-muted mb-3"></i>
+                        <h5>No investments added yet</h5>
+                        <p class="text-muted">Start building your portfolio by adding your first investment</p>
+                        <a href="{{ url_for('investments.add_investment', account_id=account.id) }}" class="btn btn-primary mt-2">
+                            Add Your First Investment
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the account "{{ account.name }}"?</p>
+                <p class="text-danger">
+                    <i class="bi bi-exclamation-triangle"></i> 
+                    This will also delete all investments linked to this account. This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('investments.delete_account', account_id=account.id) }}">
+                    <button type="submit" class="btn btn-danger">Delete Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
