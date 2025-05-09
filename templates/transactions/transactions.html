@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row mb-4">
-    <div class="col">
-        <h2>Transaction History</h2>
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6 mobile-center">
+        <h2 class="title-responsive">Transaction History</h2>
     </div>
-    <div class="col text-end">
-        <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-primary">Add Transaction</a>
+    <div class="col-md-6 text-md-end text-center mt-3 mt-md-0">
+        <div class="btn-stack-group d-md-inline-block">
+            <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-primary touch-target">
+                <i class="bi bi-plus-circle"></i> Add Transaction
+            </a>
+            <a href="{{ url_for('transactions.transaction_report') }}" class="btn btn-outline-primary ms-md-2 mt-2 mt-md-0 touch-target">
+                <i class="bi bi-file-earmark-text"></i> Reports & Export
+            </a>
+        </div>
     </div>
 </div>
 
@@ -14,35 +21,104 @@
         <h5>Filter Transactions</h5>
     </div>
     <div class="card-body">
-        <form method="get" action="{{ url_for('transactions.filter_transactions') }}">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Category</label>
-                    <select name="category" class="form-select">
-                        <option value="">All Categories</option>
-                        {% for cat in categories %}
-                            <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">End Date</label>
-                    <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{{ url_for('transactions.filter_transactions') }}" class="btn btn-outline-secondary">Clear Filters</a>
-                </div>
+        <ul class="nav nav-tabs mb-3" id="filterTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly-filter" type="button" role="tab" aria-controls="monthly-filter" aria-selected="true">
+                    Monthly View
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom-filter" type="button" role="tab" aria-controls="custom-filter" aria-selected="false">
+                    Custom Date Range
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="filterTabsContent">
+            <!-- Monthly Filter -->
+            <div class="tab-pane fade show active" id="monthly-filter" role="tabpanel" aria-labelledby="monthly-tab">
+                <form method="get" action="{{ url_for('transactions.filter_transactions') }}" id="monthlyFilterForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Select Month</label>
+                            <select name="month" id="monthSelector" class="form-select" required>
+                                {% for option in month_options %}
+                                    <option value="{{ option.month }}" data-year="{{ option.year }}" 
+                                            {% if selected_month == option.month and selected_year == option.year %}selected{% endif %}>
+                                        {{ option.label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="year" id="yearInput" value="{{ selected_year or month_options[0].year }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">View Month</button>
+                            <a href="{{ url_for('transactions.filter_transactions') }}" class="btn btn-outline-secondary">Clear Filters</a>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+            
+            <!-- Custom Date Range Filter -->
+            <div class="tab-pane fade" id="custom-filter" role="tabpanel" aria-labelledby="custom-tab">
+                <form method="get" action="{{ url_for('transactions.filter_transactions') }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <a href="{{ url_for('transactions.filter_transactions') }}" class="btn btn-outline-secondary">Clear Filters</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="card">
+    <div class="card-header bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                {% if month_name %}
+                    Transactions for {{ month_name }} {{ selected_year }}
+                {% elif start_date or end_date %}
+                    Filtered Transactions
+                {% else %}
+                    All Transactions
+                {% endif %}
+                
+                {% if selected_category %}
+                    - {{ selected_category }} Category
+                {% endif %}
+            </h5>
+            <span class="badge bg-primary">{{ transactions|length }} Items</span>
+        </div>
+    </div>
     <div class="card-body">
         {% if transactions %}
             <div class="table-responsive">
@@ -99,23 +175,13 @@
 </div>
 
 <div class="row mt-4">
-    <div class="col-md-6">
+    <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-light">
                 <h5>Expense by Category</h5>
             </div>
             <div class="card-body">
                 <canvas id="categoryChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5>Monthly Spending Trend</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="trendChart" height="300"></canvas>
             </div>
         </div>
     </div>
@@ -130,13 +196,33 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Fetch chart data from API
+<script>    document.addEventListener('DOMContentLoaded', function() {
+        // Add debug container
+        const debugContainer = document.createElement('div');
+        debugContainer.id = 'chart-debug';
+        debugContainer.style.display = 'none';
+        debugContainer.style.padding = '10px';
+        debugContainer.style.margin = '10px 0';
+        debugContainer.style.border = '1px solid #ccc';
+        document.querySelector('.row.mt-4').appendChild(debugContainer);
+          // Fetch chart data from API
         fetch('/api/spending-data')
             .then(response => response.json())
+            .catch(error => {
+                console.error('Error fetching chart data:', error);
+                debugContainer.style.display = 'block';
+                debugContainer.innerHTML = '<p>Error fetching chart data. Check console for details.</p>';
+                return { categoryData: { labels: [], datasets: [{ data: [] }] } };
+            })
             .then(data => {
-                // Create category chart
+                console.log('Chart data:', data);
+                
+                // Show debug info if needed
+                if (!data.categoryData.labels.length) {
+                    debugContainer.style.display = 'block';
+                    debugContainer.innerHTML = '<p>No category data available for chart.</p>';
+                }
+                  // Create category chart
                 const categoryCtx = document.getElementById('categoryChart').getContext('2d');
                 new Chart(categoryCtx, {
                     type: 'pie',
@@ -150,23 +236,36 @@
                         }
                     }
                 });
-
-                // Create trend chart
-                const trendCtx = document.getElementById('trendChart').getContext('2d');
-                new Chart(trendCtx, {
-                    type: 'line',
-                    data: data.trendData,
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
             })
             .catch(error => console.error('Error loading chart data:', error));
     });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle month selector change
+    const monthSelector = document.getElementById('monthSelector');
+    const yearInput = document.getElementById('yearInput');
+    
+    if(monthSelector) {
+        monthSelector.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            yearInput.value = selectedOption.dataset.year;
+        });
+    }
+    
+    // Set active tab based on which filter is being used
+    const filterTabs = document.getElementById('filterTabs');
+    if(filterTabs) {
+        if({{ selected_month|default(0)|tojson }}) {
+            // If month filter is being used, activate monthly tab
+            var monthlyTab = new bootstrap.Tab(document.getElementById('monthly-tab'));
+            monthlyTab.show();
+        } else if({{ start_date|default('')|tojson }} || {{ end_date|default('')|tojson }}) {
+            // If date range filter is being used, activate custom tab
+            var customTab = new bootstrap.Tab(document.getElementById('custom-tab'));
+            customTab.show();
+        }
+    }
+});
 </script>
 {% endblock %}

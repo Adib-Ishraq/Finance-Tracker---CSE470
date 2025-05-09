@@ -1,0 +1,130 @@
+/**
+ * Finance Tracker - Alert Styles
+ * This file contains styles for alerts and notifications
+ */
+
+/* Alert Base Styles */
+.alert {
+    border-radius: var(--border-radius-md);
+    border: none;
+    box-shadow: var(--shadow-sm);
+    padding: 0.75rem 1.25rem;
+    position: relative;
+}
+
+/* Alert Variants */
+.alert-primary {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border-left: 4px solid var(--primary-color);
+    color: var(--primary-dark);
+}
+
+.alert-success {
+    background-color: rgba(var(--success-color-rgb), 0.1);
+    border-left: 4px solid var(--success-color);
+    color: var(--success-dark);
+}
+
+.alert-danger {
+    background-color: rgba(var(--danger-color-rgb), 0.1);
+    border-left: 4px solid var(--danger-color);
+    color: var(--danger-dark);
+}
+
+.alert-warning {
+    background-color: rgba(var(--warning-color-rgb), 0.1);
+    border-left: 4px solid var(--warning-color);
+    color: var(--warning-dark);
+}
+
+.alert-info {
+    background-color: rgba(var(--info-color-rgb), 0.1);
+    border-left: 4px solid var(--info-color);
+    color: var(--info-dark);
+}
+
+/* Alert with Icon */
+.alert-with-icon {
+    padding-left: 3.5rem;
+}
+
+.alert-with-icon .alert-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+}
+
+/* Dismissible Alert */
+.alert-dismissible {
+    padding-right: 3rem;
+}
+
+.alert-dismissible .btn-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.75rem 1.25rem;
+    color: inherit;
+}
+
+/* Toast Notifications */
+.toast {
+    background-color: var(--white);
+    border: none;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--border-radius-md);
+}
+
+.toast-header {
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    z-index: 1060;
+    padding: 1rem;
+}
+
+.toast-container.top-right {
+    top: 1rem;
+    right: 1rem;
+}
+
+.toast-container.top-left {
+    top: 1rem;
+    left: 1rem;
+}
+
+.toast-container.bottom-right {
+    bottom: 1rem;
+    right: 1rem;
+}
+
+.toast-container.bottom-left {
+    bottom: 1rem;
+    left: 1rem;
+}
+
+/* Responsive Toast */
+@media (max-width: 576px) {
+    .toast-container {
+        width: calc(100% - 2rem);
+    }
+    
+    .toast-container.top-right, 
+    .toast-container.top-left {
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+    }
+    
+    .toast-container.bottom-right, 
+    .toast-container.bottom-left {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+    }
+}

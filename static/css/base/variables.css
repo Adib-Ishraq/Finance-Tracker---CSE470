@@ -1,0 +1,47 @@
+/**
+ * Finance Tracker - Variables
+ * This file contains CSS variables and constants
+ */
+
+:root {
+    /* Color Variables */
+    --primary-color: #333899;
+    --primary-light: #9370DB;
+    --primary-dark: #262671;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    /* Gradient colors */
+    --gradient-primary: linear-gradient(135deg, #333899, #9370DB, blue);
+    --gradient-footer: linear-gradient(135deg, #333899, #9370DB, #6a5acd);
+    --gradient-dark-footer: linear-gradient(135deg, #333899, #5d4bb6, #45389c);
+    
+    /* Border radius */
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 1rem;
+    --border-radius-xl: 1.5rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 15px 30px rgba(0, 0, 0, 0.2);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}

@@ -1,0 +1,359 @@
+/**
+ * Finance Tracker - Responsive Utilities
+ * This file contains responsive utility classes and media queries
+ */
+
+/* Responsive Container Classes */
+.fluid-container {
+    width: 100%;
+    padding-right: var(--bs-gutter-x, 0.75rem);
+    padding-left: var(--bs-gutter-x, 0.75rem);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Fluid Spacing */
+.fluid-p {
+    padding: calc(0.5rem + 0.5vw);
+}
+
+.fluid-m {
+    margin: calc(0.5rem + 0.5vw);
+}
+
+.fluid-my {
+    margin-top: calc(0.5rem + 0.5vw);
+    margin-bottom: calc(0.5rem + 0.5vw);
+}
+
+.fluid-mx {
+    margin-left: calc(0.5rem + 0.5vw);
+    margin-right: calc(0.5rem + 0.5vw);
+}
+
+/* Responsive Text */
+.text-responsive {
+    font-size: calc(1rem + 0.2vw);
+}
+
+.title-responsive {
+    font-size: calc(1.2rem + 0.5vw);
+}
+
+/* Responsive Visibility Classes */
+@media (max-width: 575.98px) {
+    .d-xs-none {
+        display: none !important;
+    }
+    
+    .d-xs-block {
+        display: block !important;
+    }
+    
+    .d-xs-flex {
+        display: flex !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .d-sm-none {
+        display: none !important;
+    }
+    
+    .d-sm-block {
+        display: block !important;
+    }
+    
+    .d-sm-flex {
+        display: flex !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .d-md-none {
+        display: none !important;
+    }
+    
+    .d-md-block {
+        display: block !important;
+    }
+    
+    .d-md-flex {
+        display: flex !important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .d-lg-none {
+        display: none !important;
+    }
+    
+    .d-lg-block {
+        display: block !important;
+    }
+    
+    .d-lg-flex {
+        display: flex !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .d-xl-none {
+        display: none !important;
+    }
+    
+    .d-xl-block {
+        display: block !important;
+    }
+    
+    .d-xl-flex {
+        display: flex !important;
+    }
+}
+
+/* Responsive Text Alignment */
+@media (max-width: 575.98px) {
+    .text-xs-center {
+        text-align: center !important;
+    }
+    
+    .text-xs-left {
+        text-align: left !important;
+    }
+    
+    .text-xs-right {
+        text-align: right !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .text-sm-center {
+        text-align: center !important;
+    }
+    
+    .text-sm-left {
+        text-align: left !important;
+    }
+    
+    .text-sm-right {
+        text-align: right !important;
+    }
+}
+
+/* Mobile-only classes */
+@media (max-width: 767.98px) {
+    .mobile-only {
+        display: block !important;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-center {
+        text-align: center !important;
+    }
+    
+    .mobile-stack {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .mobile-mt {
+        margin-top: 1rem !important;
+    }
+    
+    .mobile-mb {
+        margin-bottom: 1rem !important;
+    }
+    
+    .mobile-full-width {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* Desktop-only classes */
+@media (min-width: 768px) {
+    .mobile-only {
+        display: none !important;
+    }
+    
+    .desktop-only {
+        display: block !important;
+    }
+}
+
+/* Responsive Flex Utilities */
+@media (max-width: 767.98px) {
+    .flex-mobile-column {
+        flex-direction: column !important;
+    }
+    
+    .flex-mobile-row {
+        flex-direction: row !important;
+    }
+    
+    .justify-mobile-center {
+        justify-content: center !important;
+    }
+    
+    .align-mobile-center {
+        align-items: center !important;
+    }
+}
+
+/* Responsive Width and Height */
+.w-mobile-100 {
+    width: auto;
+}
+
+.h-mobile-auto {
+    height: auto;
+}
+
+@media (max-width: 767.98px) {
+    .w-mobile-100 {
+        width: 100% !important;
+    }
+    
+    .mw-mobile-100 {
+        max-width: 100% !important;
+    }
+    
+    .h-mobile-auto {
+        height: auto !important;
+    }
+}
+
+/* Responsive Margin and Padding */
+@media (max-width: 767.98px) {
+    .m-mobile-0 {
+        margin: 0 !important;
+    }
+    
+    .mx-mobile-0 {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .my-mobile-0 {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .p-mobile-0 {
+        padding: 0 !important;
+    }
+    
+    .px-mobile-0 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    .py-mobile-0 {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+}
+
+/* Responsive Font Sizes */
+@media (max-width: 575.98px) {
+    .fs-mobile-smaller {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* Responsive Z-index */
+.z-mobile-top {
+    z-index: auto;
+}
+
+@media (max-width: 767.98px) {
+    .z-mobile-top {
+        z-index: 1030 !important;
+    }
+}
+
+/* Collapsible sections for mobile */
+.mobile-collapse-header {
+    cursor: pointer;
+}
+
+@media (max-width: 576px) {
+    .mobile-collapsible {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    
+    .mobile-collapsible.show {
+        max-height: 1000px;
+    }
+}
+
+/* Button stacking on mobile */
+@media (max-width: 576px) {
+    .btn-stack-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-stack-group .btn {
+        margin: 0 !important;
+        width: 100%;
+    }
+}
+
+/* Touch-friendly controls for mobile */
+@media (max-width: 767.98px) {
+    .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    select.form-select, 
+    input.form-control,
+    .btn {
+        min-height: 44px;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.9rem;
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .action-buttons .btn-icon {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        justify-content: center;
+        align-items: center;
+        display: inline-flex;
+    }
+    
+    .action-buttons .btn-icon i {
+        font-size: 0.9rem;
+    }
+    
+    h2, .text-end {
+        text-align: center !important;
+    }
+    
+    .col-md-6.text-end {
+        margin-top: 1rem;
+    }
+    
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .dashboard-card {
+        margin-bottom: 1rem;
+    }
+}

@@ -1,12 +1,119 @@
 {% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    /* Calendar Month Picker Styles */
+    .month-picker .month-btn {
+        height: 40px;
+        font-size: 0.8rem;
+        padding: 0.25rem 0;
+        transition: all 0.2s ease;
+    }
+    
+    .month-picker .month-btn:hover {
+        transform: scale(1.05);
+        z-index: 2;
+    }
+    
+    .month-picker .month-btn.active {
+        font-weight: bold;
+        border-width: 2px;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    /* Mobile responsive styles */
+    @media (max-width: 576px) {
+        .month-picker .month-btn {
+            height: 36px;
+            font-size: 0.7rem;
+        }
+        
+        .card-body {
+            padding: 0.75rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="text-center mb-4">Set Monthly Budget</h2>
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <h2 class="text-center mb-4 title-responsive">Set Monthly Budget for {{ month_name }} {{ year }}</h2>
+            <!-- Month Calendar Selector -->
+            <div class="card mb-4 responsive-card">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Select Month</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6 col-lg-5 col-sm-10">
+                            <div class="card border">
+                                <div class="card-body p-2">
+                                    <!-- Year Navigation -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="prevYear">
+                                            <i class="bi bi-chevron-left"></i> Year
+                                        </button>
+                                        <span class="h5 mb-0" id="yearDisplay">{{ year }}</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="nextYear">
+                                            Year <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                      <!-- Month Grid - More compact with 4 columns in 3 rows -->
+                                    <div class="row g-1 month-picker" id="monthPicker">
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 1 == month %}active{% endif %}" data-month="1">Jan</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 2 == month %}active{% endif %}" data-month="2">Feb</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 3 == month %}active{% endif %}" data-month="3">Mar</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 4 == month %}active{% endif %}" data-month="4">Apr</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 5 == month %}active{% endif %}" data-month="5">May</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 6 == month %}active{% endif %}" data-month="6">Jun</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 7 == month %}active{% endif %}" data-month="7">Jul</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 8 == month %}active{% endif %}" data-month="8">Aug</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 9 == month %}active{% endif %}" data-month="9">Sep</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 10 == month %}active{% endif %}" data-month="10">Oct</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 11 == month %}active{% endif %}" data-month="11">Nov</button></div>
+                                        <div class="col-3"><button type="button" class="btn btn-outline-primary w-100 month-btn py-1 {% if 12 == month %}active{% endif %}" data-month="12">Dec</button></div>
+                                    </div>
+                                    
+                                    <!-- Selected Month Display - More compact -->
+                                    <div class="alert alert-info mt-2 mb-0 py-1 text-center">
+                                        <strong id="selectedMonth">{{ month_name }} {{ year }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" id="selectedMonthValue" value="{{ month }}">
+                            <input type="hidden" id="selectedYearValue" value="{{ year }}">
+                                      <!-- View Month button moved underneath -->
+                    <div class="text-center mt-2">
+                        <button class="btn btn-primary px-4 w-100 touch-target" id="goToMonth">
+                            <i class="bi bi-calendar-check"></i> View Month
+                        </button>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {% if budget %}
                 <div class="alert alert-info mb-4">
-                    Current Budget: ${{ "%.2f"|format(budget.amount) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Current Budget:</strong> ${{ "%.2f"|format(budget.amount) }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Rollover Amount:</strong> ${{ "%.2f"|format(budget.rollover_amount) }}
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <strong>Total Budget:</strong> ${{ "%.2f"|format(budget.amount + budget.rollover_amount) }}
+                        </div>
+                    </div>
                 </div>
             {% endif %}
 
@@ -23,16 +130,93 @@
                                 {% endfor %}
                             {% endif %}
                         </div>
-                        <div class="d-grid">
-                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="enable_rollover" name="enable_rollover" 
+                                   {% if enable_rollover %}checked{% endif %}>
+                            <label class="form-check-label" for="enable_rollover">
+                                Enable Budget Rollover
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                When enabled, unused budget will roll over to the next month
+                            </small>
+                        </div>
+                          <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg touch-target") }}
                         </div>
                     </form>
                 </div>
-            </div>
-
-            <div class="text-center mt-3">
-                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>            <div class="text-center mt-3 btn-stack-group">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary me-md-2 touch-target">Back to Dashboard</a>
+                <a href="{{ url_for('budgets.monthly_budget') }}" class="btn btn-primary mt-2 mt-md-0 touch-target">View Monthly Budget</a>
             </div>
         </div>
     </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Month names array for display
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        // Calendar picker elements
+        const yearDisplay = document.getElementById('yearDisplay');
+        const selectedMonth = document.getElementById('selectedMonth');
+        const selectedMonthValue = document.getElementById('selectedMonthValue');
+        const selectedYearValue = document.getElementById('selectedYearValue');
+        const monthPicker = document.getElementById('monthPicker');
+        const prevYearBtn = document.getElementById('prevYear');
+        const nextYearBtn = document.getElementById('nextYear');
+        const goToMonthBtn = document.getElementById('goToMonth');
+        
+        // Initialize current dates
+        let currentMonth = parseInt(selectedMonthValue.value);
+        let currentYear = parseInt(selectedYearValue.value);
+        
+        // Update displays
+        function updateYearDisplay() {
+            yearDisplay.textContent = currentYear;
+        }
+        
+        function updateSelectedMonthDisplay() {
+            selectedMonth.textContent = `${monthNames[currentMonth-1]} ${currentYear}`;
+        }
+        
+        // Handle year navigation
+        prevYearBtn.addEventListener('click', function() {
+            currentYear--;
+            updateYearDisplay();
+            selectedYearValue.value = currentYear;
+            updateSelectedMonthDisplay();
+        });
+        
+        nextYearBtn.addEventListener('click', function() {
+            currentYear++;
+            updateYearDisplay();
+            selectedYearValue.value = currentYear;
+            updateSelectedMonthDisplay();
+        });
+        
+        // Handle month selection
+        monthPicker.querySelectorAll('.month-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active state
+                monthPicker.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update selected month
+                currentMonth = parseInt(this.dataset.month);
+                selectedMonthValue.value = currentMonth;
+                updateSelectedMonthDisplay();
+            });
+        });
+        
+        // Navigate to selected month
+        goToMonthBtn.addEventListener('click', function() {
+            window.location.href = `{{ url_for('budgets.set_budget') }}?month=${currentMonth}&year=${currentYear}`;
+        });
+    });
+</script>
 {% endblock %}

@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<style>
+    .tax-card {
+        transition: transform 0.2s;
+        border-left: 4px solid #9370DB;
+    }
+    .tax-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    .tax-rate {
+        font-size: 0.9rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 3px;
+    }
+    .approaching-long-term {
+        border-left: 4px solid #e74a3b;
+    }
+    .harvesting-card {
+        border-left: 4px solid #1cc88a;
+    }
+    .nav-pills .nav-link.active {
+        background-color: #9370DB;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Tax Optimization</h2>
+            <p>Optimize your investment taxes and identify potential savings</p>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('investments.investment_dashboard') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Tax Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tax-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Estimated Tax Liability</h6>
+                    <h3 class="card-title text-primary">${{ "%.2f"|format(tax_analysis.total_estimated_tax|default(0)) }}</h3>
+                    <p class="card-text">Based on current gains</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tax-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Potential Tax Savings</h6>
+                    <h3 class="card-title text-success">${{ "%.2f"|format(tax_analysis.potential_tax_savings|default(0)) }}</h3>
+                    <p class="card-text">By optimizing holdings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tax-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Short-Term Holdings</h6>
+                    <h3 class="card-title">{{ tax_analysis.short_term_holdings|length }}</h3>
+                    <p class="card-text">Higher tax rate applies</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 tax-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Long-Term Holdings</h6>
+                    <h3 class="card-title">{{ tax_analysis.long_term_holdings|length }}</h3>
+                    <p class="card-text">Lower tax rate applies</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Income Bracket Selection -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="m-0">Tax Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('investments.tax_optimization') }}">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Income Tax Bracket</label>
+                                <select name="income_bracket" class="form-select" onchange="this.form.submit()">
+                                    <option value="low" {% if income_bracket == 'low' %}selected{% endif %}>Low Income</option>
+                                    <option value="medium" {% if income_bracket == 'medium' %}selected{% endif %}>Medium Income</option>
+                                    <option value="high" {% if income_bracket == 'high' %}selected{% endif %}>High Income</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="alert alert-info mb-0">
+                                    <strong>Note:</strong> Tax calculations are estimates based on typical capital gains tax rates. Consult a tax professional for specific advice.
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tax Insights Tabs -->
+    <div class="card mb-4">
+        <div class="card-header bg-light p-0">
+            <ul class="nav nav-pills nav-fill" id="taxInsightsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="approaching-tab" data-bs-toggle="tab" data-bs-target="#approaching" type="button">
+                        <i class="bi bi-alarm"></i> Approaching Long-Term <span class="badge bg-danger">{{ tax_analysis.approaching_long_term|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="harvesting-tab" data-bs-toggle="tab" data-bs-target="#harvesting" type="button">
+                        <i class="bi bi-scissors"></i> Tax Loss Harvesting <span class="badge bg-success">{{ tax_harvesting_opportunities|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="holdings-tab" data-bs-toggle="tab" data-bs-target="#holdings" type="button">
+                        <i class="bi bi-list-check"></i> All Holdings
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="taxInsightsTabContent">
+                <!-- Approaching Long-Term Tab -->
+                <div class="tab-pane fade show active" id="approaching" role="tabpanel">
+                    {% if tax_analysis.approaching_long_term %}
+                    <div class="mb-3">
+                        <p>These investments are approaching long-term status (held for nearly one year). Consider holding them until they qualify for lower long-term capital gains tax rates.</p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Investment</th>
+                                    <th>Current Gain</th>
+                                    <th>Days to Long-Term</th>
+                                    <th>Potential Tax Savings</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for holding in tax_analysis.approaching_long_term %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ holding.name }}</strong>
+                                        {% if holding.symbol %}<small class="text-muted">({{ holding.symbol }})</small>{% endif %}
+                                    </td>
+                                    <td class="text-success">${{ "%.2f"|format(holding.profit) }}</td>
+                                    <td>{{ holding.days_to_long_term }} days</td>
+                                    <td class="text-success">${{ "%.2f"|format(holding.potential_savings) }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No investments are currently approaching long-term status.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Tax Loss Harvesting Tab -->
+                <div class="tab-pane fade" id="harvesting" role="tabpanel">
+                    {% if tax_harvesting_opportunities %}
+                    <div class="mb-3">
+                        <p>These investments show potential for tax loss harvesting. Consider selling these investments at a loss to offset capital gains, then reinvesting in similar but not "substantially identical" securities.</p>
+                    </div>
+                    <div class="row">
+                        {% for opportunity in tax_harvesting_opportunities %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card harvesting-card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">{{ opportunity.investment.name }}</h5>
+                                        {% if opportunity.investment.symbol %}
+                                        <small class="text-muted">{{ opportunity.investment.symbol }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <span class="badge bg-danger">{{ "%.2f"|format(opportunity.investment.loss_percentage) }}%</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <p class="text-muted mb-1">Current Loss</p>
+                                            <p class="text-danger">${{ "%.2f"|format(opportunity.investment.loss) }}</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="text-muted mb-1">Tax Benefit</p>
+                                            <p class="text-success">${{ "%.2f"|format(opportunity.tax_benefit) }}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="mb-2">Potential Alternatives:</p>
+                                    <ul class="list-group list-group-flush">
+                                        {% for alternative in opportunity.similar_investments %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                                            <span>{{ alternative.name }}{% if alternative.symbol %} ({{ alternative.symbol }}){% endif %}</span>
+                                            <span class="badge {% if alternative.performance > 0 %}bg-success{% elif alternative.performance < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                {{ "%.2f"|format(alternative.performance) }}%
+                                            </span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No tax loss harvesting opportunities identified at this time.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- All Holdings Tab -->
+                <div class="tab-pane fade" id="holdings" role="tabpanel">
+                    <ul class="nav nav-pills mb-3">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#short-term" data-bs-toggle="tab">Short-Term ({{ tax_analysis.short_term_holdings|length }})</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#long-term" data-bs-toggle="tab">Long-Term ({{ tax_analysis.long_term_holdings|length }})</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="short-term">
+                            {% if tax_analysis.short_term_holdings %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Investment</th>
+                                            <th>Purchase Date</th>
+                                            <th>Held For</th>
+                                            <th>Gain/Loss</th>
+                                            <th>Est. Tax</th>
+                                            <th>Tax Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for holding in tax_analysis.short_term_holdings %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ holding.name }}</strong>
+                                                {% if holding.symbol %}<small class="text-muted">({{ holding.symbol }})</small>{% endif %}
+                                            </td>
+                                            <td>{{ holding.purchase_date.strftime('%Y-%m-%d') }}</td>
+                                            <td>{{ holding.holding_period }} days</td>
+                                            <td class="{% if holding.profit > 0 %}text-success{% elif holding.profit < 0 %}text-danger{% endif %}">
+                                                ${{ "%.2f"|format(holding.profit) }}
+                                            </td>
+                                            <td>${{ "%.2f"|format(holding.estimated_tax) }}</td>
+                                            <td><span class="tax-rate bg-warning text-dark">{{ "%.1f"|format(holding.tax_rate) }}%</span></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <p class="text-muted mb-0">No short-term holdings found.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="tab-pane" id="long-term">
+                            {% if tax_analysis.long_term_holdings %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Investment</th>
+                                            <th>Purchase Date</th>
+                                            <th>Held For</th>
+                                            <th>Gain/Loss</th>
+                                            <th>Est. Tax</th>
+                                            <th>Tax Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for holding in tax_analysis.long_term_holdings %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ holding.name }}</strong>
+                                                {% if holding.symbol %}<small class="text-muted">({{ holding.symbol }})</small>{% endif %}
+                                            </td>
+                                            <td>{{ holding.purchase_date.strftime('%Y-%m-%d') }}</td>
+                                            <td>{{ holding.holding_period }} days</td>
+                                            <td class="{% if holding.profit > 0 %}text-success{% elif holding.profit < 0 %}text-danger{% endif %}">
+                                                ${{ "%.2f"|format(holding.profit) }}
+                                            </td>
+                                            <td>${{ "%.2f"|format(holding.estimated_tax) }}</td>
+                                            <td><span class="tax-rate bg-success text-white">{{ "%.1f"|format(holding.tax_rate) }}%</span></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <p class="text-muted mb-0">No long-term holdings found.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tax Education Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="m-0">Tax Education</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h6><i class="bi bi-calendar-check"></i> Capital Gains Holding Periods</h6>
+                    <p class="small">Investments held for more than one year qualify for lower long-term capital gains tax rates. Short-term capital gains (held for one year or less) are typically taxed at higher ordinary income rates.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6><i class="bi bi-scissors"></i> Tax Loss Harvesting</h6>
+                    <p class="small">Tax loss harvesting involves selling investments at a loss to offset capital gains tax liability. To avoid wash sale rules, don't repurchase a "substantially identical" investment within 30 days.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6><i class="bi bi-building"></i> Tax-Advantaged Accounts</h6>
+                    <p class="small">Consider maximizing contributions to tax-advantaged accounts like IRAs and 401(k)s before investing in taxable accounts. These accounts offer tax benefits that can significantly improve long-term returns.</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <small class="text-muted">This information is for educational purposes only. Consult a tax professional for advice specific to your situation.</small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enable all Bootstrap tabs and tooltips
+    var tabElms = document.querySelectorAll('button[data-bs-toggle="tab"]')
+    tabElms.forEach(function(tabElm) {
+        new bootstrap.Tab(tabElm)
+    })
+    
+    var tooltipElms = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    tooltipElms.forEach(function(tooltipElm) {
+        new bootstrap.Tooltip(tooltipElm)
+    })
+    
+    // Add tax calendar functionality here if needed
+})
+</script>
+{% endblock %}

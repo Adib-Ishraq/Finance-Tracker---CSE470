@@ -1,0 +1,100 @@
+/**
+ * Finance Tracker - Chart Styles
+ * This file contains chart-related styling
+ */
+
+/* Chart Containers */
+.chart-container {
+    height: 250px;
+    position: relative;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+/* Chart Containers - Responsive */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 220px;
+    }
+}
+
+@media (max-width: 576px) {
+    .chart-container {
+        height: 180px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        margin: 0 !important;
+    }
+}
+
+/* Small Chart Containers */
+.chart-sm {
+    height: 150px;
+}
+
+/* Daily Spending Chart Container - Extra bottom spacing */
+.daily-spending-chart-container {
+    margin-bottom: 3rem;
+    height: 230px !important; /* Force a more appropriate height */
+}
+
+/* Chart Legends */
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.chart-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+/* Chart Tooltips - Custom Styling */
+.chart-tooltip {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    color: white;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+/* Donut Chart Center Text */
+.donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.donut-center .value {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.donut-center .label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}

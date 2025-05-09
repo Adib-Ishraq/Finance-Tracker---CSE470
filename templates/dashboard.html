@@ -1,106 +1,344 @@
 {% extends "base.html" %}
+
+{% block extra_css %}
+<!-- Dashboard styles have been moved to component CSS files:
+     - Card styles are in components/cards.css
+     - Chart styles are in components/charts.css
+     - Progress bar styles are in components/progress.css
+     - Responsive utilities are in utilities/responsive.css
+-->
+{% endblock %}
+
 {% block content %}
     <div class="row mb-4">
-        <div class="col">
+        <div class="col-md-6">
             <h2>Welcome, {{ current_user.username }}</h2>
+            <p class="lead text-muted">{{ month_name }} {{ year }} Overview</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('budgets.monthly_budget') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-graph-up"></i> Monthly Analysis
+            </a>
+            <a href="{{ url_for('budgets.compare_months') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-bar-chart"></i> Compare Months
+            </a>
         </div>
     </div>
 
+    <!-- Monthly Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-3">
+            <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Current Balance</h5>
-                    <h3 class="text-{{ 'success' if balance >= 0 else 'danger' }}">
-                        ${{ "%.2f"|format(balance) }}
+                    <h5 class="card-title">Monthly Income</h5>
+                    <h3 class="text-success">
+                        ${{ "%.2f"|format(monthly_income) }}
                     </h3>
+                    <p class="card-text small text-muted">Total earnings this month</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-3">
+            <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Budget</h5>
-                    <h3>${{ "%.2f"|format(budget.amount) if budget else "Not Set" }}</h3>
+                    <h5 class="card-title">Monthly Expenses</h5>
+                    <h3 class="text-danger">
+                        ${{ "%.2f"|format(monthly_expense) }}
+                    </h3>
+                    <p class="card-text small text-muted">Total spending this month</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Monthly Budget</h5>
+                    <h3>${{ "%.2f"|format(total_budget) if budget else "Not Set" }}</h3>
+                    {% if budget and budget.rollover_amount > 0 %}
+                        <p class="card-text small text-muted">
+                            Base: ${{ "%.2f"|format(budget.amount) }} + 
+                            Rollover: ${{ "%.2f"|format(budget.rollover_amount) }}
+                        </p>
+                    {% else %}
+                        <p class="card-text small text-muted">Set for {{ month_name }} {{ year }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card dashboard-card h-100">
                 <div class="card-body">
                     <h5 class="card-title">Remaining Budget</h5>
                     <h3 class="text-{{ 'success' if remaining_budget >= 0 else 'danger' }}">
                         ${{ "%.2f"|format(remaining_budget) if budget else "N/A" }}
                     </h3>
+                    {% if budget %}
+                        <div class="progress budget-progress mt-2">
+                            <div class="progress-bar 
+                                {% if budget_percent > 90 %}bg-danger{% elif budget_percent > 75 %}bg-warning{% else %}bg-success{% endif %}" 
+                                role="progressbar" 
+                                style="width: {{ budget_percent }}%;" 
+                                aria-valuenow="{{ budget_percent }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100"></div>
+                        </div>
+                        <p class="card-text small text-muted mt-1">{{ budget_percent|round|int }}% of budget used</p>
+                    {% else %}
+                        <p class="card-text small text-muted">No budget set</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Action Buttons and Overall Balance -->
     <div class="row mb-4">
-        <div class="col">
-            <div class="d-flex gap-2">
-                <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-primary">Add Transaction</a>
-                <a href="{{ url_for('budgets.set_budget') }}" class="btn btn-secondary">Set Budget</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <h3>Recent Transactions</h3>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Category</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for transaction in transactions %}
-                            <tr>
-                                <td>{{ transaction.type }}</td>
-                                <td>{{ transaction.category }}</td>
-                                <td class="text-{{ 'success' if transaction.type == 'Income' else 'danger' }}">
-                                    ${{ "%.2f"|format(transaction.amount) }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    {% if goals %}
-<div class="row mt-4">
-    <div class="col">
-        <h3>Your Financial Goals</h3>
-        <div class="row">
-            {% for goal in goals %}
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ goal.name }}</h5>
-                        <div class="progress mb-2">
-                            <div class="progress-bar bg-success" role="progressbar"
-                                 style="width: {{ goal.progress_percentage }}%"
-                                aria-valuenow="{{ goal.progress_percentage }}"
-                                aria-valuemin="0" aria-valuemax="100">
-                                {{ goal.progress_percentage }}%
-                            </div>
-                        </div>
-                        <p class="card-text">
-                            ${{ "%.2f"|format(goal.current_amount) }} of ${{ "%.2f"|format(goal.target_amount) }}
-                        </p>
-                        <a href="{{ url_for('goals.view_goal', goal_id=goal.id) }}" class="btn btn-sm btn-primary">View</a>
+        <div class="col-md-6">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Quick Actions</h5>
+                        <span class="badge bg-primary rounded-pill">{{ month_name }}</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Transaction
+                        </a>
+                        <a href="{{ url_for('budgets.set_budget') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-gear"></i> Manage Monthly Budget
+                        </a>                        <a href="{{ url_for('transactions.filter_transactions') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-list-ul"></i> View All Transactions
+                        </a>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+        <div class="col-md-6">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">Financial Summary</h5>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <span class="text-muted d-block">Monthly Balance:</span>
+                                <h4 class="text-{{ 'success' if monthly_balance >= 0 else 'danger' }} mt-1">
+                                    ${{ "%.2f"|format(monthly_balance) }}
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <span class="text-muted d-block">Overall Balance:</span>
+                                <h4 class="text-{{ 'success' if overall_balance >= 0 else 'danger' }} mt-1">
+                                    ${{ "%.2f"|format(overall_balance) }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <div class="chart-container" style="height: 120px;">
+                            <canvas id="monthlyBalanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-{% endif %}
+
+    <!-- Recent Transactions and Daily Spending -->
+    <div class="row mb-5">
+        <div class="col-md-6"> <!-- Changed from col-md-7 -->
+            <div class="card dashboard-card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Transactions</h5>
+                    <a href="{{ url_for('transactions.filter_transactions') }}" class="btn btn-sm btn-link">View All</a>
+                </div>
+                <div class="card-body p-0 recent-transactions-card-body"> <!-- Added recent-transactions-card-body class -->
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                    <tr>
+                                        <td>{{ transaction.date.strftime('%b %d') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if transaction.type == 'Income' else 'danger' }}">
+                                                {{ transaction.type }}
+                                            </span>
+                                        </td>
+                                        <td>{{ transaction.category }}</td>
+                                        <td class="text-{{ 'success' if transaction.type == 'Income' else 'danger' }}">
+                                            ${{ "%.2f"|format(transaction.amount) }}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3">No transactions found for this month</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6"> <!-- Changed from col-md-5 -->
+            <div class="card dashboard-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Daily Spending - {{ month_name }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container daily-spending-chart-container">
+                        <canvas id="dailySpendingChart"></canvas>
+                    </div>
+                </div>
+        </div>
+        </div>
+    </div>
+    
+    {% if goals %}
+    <div class="row mt-4 mb-5">
+        <div class="col-md-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Financial Goals</h5>
+                    <a href="{{ url_for('goals.add_goal') }}" class="btn btn-sm btn-outline-primary">Add Goal</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for goal in goals %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title d-flex justify-content-between align-items-center">
+                                        {{ goal.name }}
+                                        <span class="badge bg-{{ 'success' if goal.progress_percentage >= 100 else 'primary' }} rounded-pill">
+                                            {{ goal.progress_percentage }}%
+                                        </span>
+                                    </h5>
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             style="width: {{ goal.progress_percentage }}%"
+                                            aria-valuenow="{{ goal.progress_percentage }}"
+                                            aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <p class="card-text">
+                                        ${{ "%.2f"|format(goal.current_amount) }} of ${{ "%.2f"|format(goal.target_amount) }}
+                                    </p>
+                                    <a href="{{ url_for('goals.view_goal', goal_id=goal.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Daily Spending Chart
+        const dailySpendingCtx = document.getElementById('dailySpendingChart').getContext('2d');
+        const dailySpendingData = {
+            labels: {{ daily_spending.labels|tojson }},
+            datasets: [{
+                label: 'Daily Expenses',
+                data: {{ daily_spending.data|tojson }},
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        };
+        
+        const dailySpendingChart = new Chart(dailySpendingCtx, {
+            type: 'bar',
+            data: dailySpendingData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount ($)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Day of Month'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.raw.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Monthly Balance Chart
+        const monthlyBalanceCtx = document.getElementById('monthlyBalanceChart').getContext('2d');
+        const monthlyBalanceChart = new Chart(monthlyBalanceCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Income', 'Expenses'],
+                datasets: [{
+                    data: [{{ monthly_income }}, {{ monthly_expense }}],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(255, 99, 132, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw;
+                                const percentage = Math.round((value / ({{ monthly_income }} + {{ monthly_expense }})) * 100);
+                                return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

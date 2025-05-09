@@ -66,7 +66,9 @@ class Transaction(db.Model):
     category = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
+    description = db.Column(db.String(255), nullable=True)
+    auto_categorized = db.Column(db.Boolean, default=False)
+    
     @classmethod
     def get_transactions_by_category(cls, user_id, category=None, start_date=None, end_date=None):
         query = cls.query.filter_by(user_id=user_id)
@@ -85,37 +87,255 @@ class Transaction(db.Model):
                 query = query.filter(cls.date <= end_date)
             except (ValueError, TypeError):
                 pass
-
+        
         return query.order_by(cls.date.desc()).all()
-
+        
     @classmethod
-    def get_category_totals(cls, user_id, transaction_type="Expense"):
-        return db.session.query(
-            cls.category,
-            func.sum(cls.amount).label('total')
-        ).filter_by(
-            user_id=user_id,
-            type=transaction_type
-        ).group_by(cls.category).all()
-
-    @classmethod
-    def get_monthly_totals(cls, user_id, months=6):
-        end_date = datetime.utcnow()
-        start_date = end_date - timedelta(days=30 * months)
-
-        return db.session.query(
-            func.strftime('%Y-%m', cls.date).label('month'),
-            func.sum(cls.amount).label('total')
-        ).filter(
+    def get_monthly_totals(cls, user_id, month=None, year=None):
+        """Get total income and expenses for a specific month, defaults to current month"""
+        if month is None:
+            month = datetime.utcnow().month
+        if year is None:
+            year = datetime.utcnow().year
+            
+        income = db.session.query(func.sum(cls.amount)).filter(
+            cls.user_id == user_id,
+            cls.type == 'Income',
+            extract('month', cls.date) == month,
+            extract('year', cls.date) == year
+        ).scalar() or 0
+        
+        expenses = db.session.query(func.sum(cls.amount)).filter(
             cls.user_id == user_id,
             cls.type == 'Expense',
-            cls.date.between(start_date, end_date)
-        ).group_by('month').order_by('month').all()
+            extract('month', cls.date) == month,
+            extract('year', cls.date) == year
+        ).scalar() or 0
+        
+        return {
+            'income': income,
+            'expenses': expenses,
+            'net': income - expenses,
+            'month': month,
+            'year': year
+        }
+    
+    @classmethod
+    def get_monthly_comparison(cls, user_id, month1, year1, month2, year2):
+        """Compare two different months' income and expenses"""
+        first_month = cls.get_monthly_totals(user_id, month1, year1)
+        second_month = cls.get_monthly_totals(user_id, month2, year2)
+        
+        return {
+            'first_month': first_month,
+            'second_month': second_month,
+            'income_difference': second_month['income'] - first_month['income'],
+            'expense_difference': second_month['expenses'] - first_month['expenses'],
+            'net_difference': second_month['net'] - first_month['net']
+        }
+        
+    @classmethod
+    def get_monthly_category_totals(cls, user_id, transaction_type="Expense", month=None, year=None):
+        """Get category totals for a specific month"""
+        try:
+            query = db.session.query(
+                cls.category,
+                func.sum(cls.amount).label('total')
+            ).filter_by(
+                user_id=user_id,
+                type=transaction_type
+            )
+            
+            # Add month/year filter if provided
+            if month and year:
+                query = query.filter(
+                    extract('month', cls.date) == month,
+                    extract('year', cls.date) == year
+                )
+            
+            return query.group_by(cls.category).all()
+            
+        except Exception as e:
+            print(f"Error in get_monthly_category_totals: {str(e)}")
+            return []
+    
+    @classmethod
+    def get_monthly_totals(cls, user_id, month=None, year=None):
+        """Get total income and expenses for a specific month, defaults to current month"""
+        if month is None:
+            month = datetime.utcnow().month
+        if year is None:
+            year = datetime.utcnow().year
+            
+        income = db.session.query(func.sum(cls.amount)).filter(
+            cls.user_id == user_id,
+            cls.type == 'Income',
+            extract('month', cls.date) == month,
+            extract('year', cls.date) == year
+        ).scalar() or 0
+        
+        expenses = db.session.query(func.sum(cls.amount)).filter(
+            cls.user_id == user_id,
+            cls.type == 'Expense',
+            extract('month', cls.date) == month,
+            extract('year', cls.date) == year
+        ).scalar() or 0
+        
+        return {
+            'income': income,
+            'expenses': expenses,
+            'net': income - expenses,
+            'month': month,
+            'year': year
+        }
+    
+    @classmethod
+    def get_monthly_comparison(cls, user_id, month1, year1, month2, year2):
+        """Compare two different months' income and expenses"""
+        first_month = cls.get_monthly_totals(user_id, month1, year1)
+        second_month = cls.get_monthly_totals(user_id, month2, year2)
+        
+        return {
+            'first_month': first_month,
+            'second_month': second_month,
+            'income_difference': second_month['income'] - first_month['income'],
+            'expense_difference': second_month['expenses'] - first_month['expenses'],
+            'net_difference': second_month['net'] - first_month['net']
+        }
+        
+    @classmethod
+    def get_monthly_category_totals(cls, user_id, transaction_type="Expense", month=None, year=None):
+        """Get category totals for a specific month"""
+        try:
+            query = db.session.query(
+                cls.category,
+                func.sum(cls.amount).label('total')
+            ).filter_by(
+                user_id=user_id,
+                type=transaction_type
+            )
+            
+            # Add month/year filter if provided
+            if month and year:
+                query = query.filter(
+                    extract('month', cls.date) == month,
+                    extract('year', cls.date) == year
+                )
+            
+            return query.group_by(cls.category).all()
+            
+        except Exception as e:
+            print(f"Error in get_monthly_category_totals: {str(e)}")
+            return []
+    
+    @classmethod
+    def get_category_totals(cls, user_id, transaction_type="Expense"):
+        try:
+            result = db.session.query(
+                cls.category,
+                func.sum(cls.amount).label('total')
+            ).filter_by(
+                user_id=user_id,
+                type=transaction_type
+            ).group_by(cls.category).all()
+            
+            # Check if we have any results
+            if not result:
+                # Check if user has any transactions at all
+                transaction_count = db.session.query(func.count(cls.id)).filter_by(
+                    user_id=user_id,
+                    type=transaction_type
+                ).scalar()
+                print(f"User {user_id} has {transaction_count} {transaction_type} transactions, but no category totals")
+                
+                # If there are no transactions, we'll return an empty list
+                # The API will handle providing sample data
+            
+            return result
+        except Exception as e:
+            print(f"Error in get_category_totals: {str(e)}")
+            return []
 
 class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    month = db.Column(db.Integer, nullable=False, default=datetime.utcnow().month)
+    year = db.Column(db.Integer, nullable=False, default=datetime.utcnow().year)
+    rollover_amount = db.Column(db.Float, nullable=False, default=0.0)
+    enable_rollover = db.Column(db.Boolean, nullable=False, default=True)
+    
+    @classmethod
+    def get_current_month_budget(cls, user_id):
+        """Get the budget for the current month, creating one if it doesn't exist"""
+        current_month = datetime.utcnow().month
+        current_year = datetime.utcnow().year
+        
+        budget = cls.query.filter_by(
+            user_id=user_id,
+            month=current_month,
+            year=current_year
+        ).first()
+        
+        if not budget:
+            # Check if there was a budget for the previous month
+            prev_month = 12 if current_month == 1 else current_month - 1
+            prev_year = current_year - 1 if current_month == 1 else current_year
+            
+            prev_budget = cls.query.filter_by(
+                user_id=user_id,
+                month=prev_month,
+                year=prev_year
+            ).first()
+            
+            # Calculate rollover amount if previous budget exists
+            rollover_amount = 0.0
+            base_amount = 0.0
+            
+            if prev_budget:
+                base_amount = prev_budget.amount
+                
+                # Get previous month's expenses
+                from models import Transaction
+                prev_month_expenses = db.session.query(func.sum(Transaction.amount)).filter(
+                    Transaction.user_id == user_id,
+                    Transaction.type == 'Expense',
+                    extract('month', Transaction.date) == prev_month,
+                    extract('year', Transaction.date) == prev_year
+                ).scalar() or 0
+                
+                # Calculate rollover if enabled
+                if prev_budget.enable_rollover:
+                    remaining = prev_budget.amount + prev_budget.rollover_amount - prev_month_expenses
+                    rollover_amount = max(0, remaining)  # Only rollover positive amounts
+            
+            # Create new budget with rollover from previous month
+            budget = cls(
+                user_id=user_id,
+                amount=base_amount,
+                month=current_month,
+                year=current_year,
+                rollover_amount=rollover_amount,
+                enable_rollover=True if prev_budget else True
+            )
+            db.session.add(budget)
+            db.session.commit()
+            
+        return budget
+    
+    @property
+    def total_budget(self):
+        """Get the total budget including rollover"""
+        return self.amount + self.rollover_amount
+    
+    @classmethod
+    def get_budget_by_month(cls, user_id, month, year):
+        """Get budget for a specific month"""
+        return cls.query.filter_by(
+            user_id=user_id,
+            month=month,
+            year=year
+        ).first()
 
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -183,6 +403,8 @@ class Investment(db.Model):
     current_value = db.Column(db.Float, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     notes = db.Column(db.Text, nullable=True)
+    tax_lot_id = db.Column(db.String(50), nullable=True)  # For tracking tax lots
+    tax_status = db.Column(db.String(20), nullable=True)  # "Short-term" or "Long-term"
     
     @property
     def profit_loss(self):

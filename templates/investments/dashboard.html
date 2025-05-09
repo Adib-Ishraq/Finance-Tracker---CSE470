@@ -24,13 +24,15 @@
         <div class="col">
             <h2>Investment Dashboard</h2>
             <p>Track and manage your investment portfolio</p>
-        </div>
-        <div class="col text-end">
+        </div>        <div class="col text-end">
             <a href="{{ url_for('investments.add_account') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Add Account
             </a>
             <a href="{{ url_for('investments.portfolio_performance') }}" class="btn btn-outline-primary">
                 <i class="bi bi-graph-up"></i> Performance Analysis
+            </a>
+            <a href="{{ url_for('investments.tax_optimization') }}" class="btn btn-outline-success">
+                <i class="bi bi-cash-coin"></i> Tax Optimizer
             </a>
         </div>
     </div>
@@ -78,73 +80,74 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Asset Allocation Chart -->
-    <div class="row mb-4">
-        <div class="col-md-8 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="m-0">Risk Allocation</h5>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-secondary active">Value</button>
-                        <button class="btn btn-outline-secondary">Percentage</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="asset-distribution" id="riskAllocationChart">
-                        {% if not accounts or accounts|length == 0 or not risk_categories %}
-                        <div class="text-center h-100 d-flex align-items-center justify-content-center">
-                            <div>
-                                <p class="text-muted">No investment data available</p>
-                                <a href="{{ url_for('investments.add_account') }}" class="btn btn-sm btn-primary">
-                                    Add Your First Account
-                                </a>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-light">
-                    <h5 class="m-0">Risk Categories</h5>
-                </div>
-                <div class="card-body">
-                    {% if risk_categories %}
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Risk Level</th>
-                                    <th>Count</th>
-                                    <th>Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for category, data in risk_categories.items() %}
-                                <tr>
-                                    <td>{{ category }}</td>
-                                    <td>{{ data.count }}</td>
-                                    <td>${{ "%.2f"|format(data.total_value) }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="text-center h-100 d-flex align-items-center justify-content-center">
-                        <p class="text-muted">No risk data to display</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
+    </div>    
     
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+    
+    
+    
+    
+
     <!-- Investment Accounts -->
     <h3 class="mb-3">Your Accounts</h3>
     {% if accounts and accounts|length > 0 %}

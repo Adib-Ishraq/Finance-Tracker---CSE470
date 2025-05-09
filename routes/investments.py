@@ -4,6 +4,7 @@ from datetime import datetime
 
 from models import db, InvestmentAccount, Investment, Transaction
 from forms import InvestmentAccountForm, InvestmentForm
+from tax_optimizer import analyze_tax_lots, get_tax_loss_harvesting_opportunities
 
 investments = Blueprint('investments', __name__)
 
@@ -104,6 +105,30 @@ def delete_account(account_id):
     
     flash('Investment account deleted successfully!', 'success')
     return redirect(url_for('investments.investment_dashboard'))
+
+@investments.route('/investments/tax-optimization')
+@login_required
+def tax_optimization():
+    # Get all user's investments across all accounts
+    accounts = InvestmentAccount.query.filter_by(user_id=current_user.id).all()
+    
+    all_investments = []
+    for account in accounts:
+        all_investments.extend(account.investments)
+    
+    # Get income bracket from query params or default to medium
+    income_bracket = request.args.get('income_bracket', 'medium')
+    
+    # Get tax analysis
+    tax_analysis = analyze_tax_lots(all_investments, income_bracket)
+    
+    # Get tax loss harvesting opportunities
+    tax_harvesting_opportunities = get_tax_loss_harvesting_opportunities(all_investments, income_bracket)
+    
+    return render_template('investments/tax_optimization.html', 
+                          tax_analysis=tax_analysis,
+                          tax_harvesting_opportunities=tax_harvesting_opportunities,
+                          income_bracket=income_bracket)
 
 @investments.route('/investments/account/<int:account_id>/add', methods=['GET', 'POST'])
 @login_required

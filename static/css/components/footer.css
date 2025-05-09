@@ -1,0 +1,95 @@
+/**
+ * Finance Tracker - Footer Styles
+ * This file contains footer-related styling
+ */
+
+/* Footer base styles */
+.footer {
+    background: linear-gradient(135deg, #333899, #9370DB, #6a5acd);
+    color: white;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    width: 100%;
+    margin-top: auto; /* Push footer to the bottom */
+    position: relative; /* Ensure it doesn't overlay content */
+    z-index: 10; /* Keep it above other content but don't make it fixed/absolute */
+}
+
+/* Footer links */
+.footer a {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.footer a:hover {
+    color: white !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Footer text */
+.footer .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Footer social icons */
+.footer .social-icon {
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.footer .social-icon:hover {
+    transform: translateY(-3px);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+/* Footer dividers */
+.footer hr {
+    opacity: 0.1;
+}
+
+/* Footer columns for responsive layout */
+.footer-col {
+    margin-bottom: 1.5rem;
+}
+
+.footer-heading {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+/* Footer links container */
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+/* Dark mode footer adjustments */
+[data-bs-theme="dark"] .footer {
+    background: linear-gradient(135deg, #333899, #5d4bb6, #45389c);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Footer on mobile */
+@media (max-width: 767.98px) {
+    .footer {
+        text-align: center;
+    }
+    
+    .footer-col {
+        margin-bottom: 2rem;
+    }
+    
+    .social-links {
+        justify-content: center !important;
+    }
+    
+    .copyright {
+        text-align: center;
+    }
+}

@@ -17,7 +17,9 @@ class LoginForm(FlaskForm):
 
 class TransactionForm(FlaskForm):
     type = SelectField('Type', choices=[('Income', 'Income'), ('Expense', 'Expense')], validators=[InputRequired()])
+    description = StringField('Description', validators=[InputRequired(), Length(max=255)])
     category = StringField('Category', validators=[InputRequired()])
+    category_suggestions = SelectField('Suggested Categories', choices=[], validate_choice=False)
     amount = DecimalField('Amount', validators=[InputRequired()])
     date = DateField('Date', validators=[InputRequired()], default=datetime.utcnow)
     submit = SubmitField('Add Transaction')

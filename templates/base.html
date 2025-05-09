@@ -2,183 +2,100 @@
 <html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    <meta name="description" content="Personal Finance Tracker - Manage your budgets, investments, and financial goals">
+    <meta name="theme-color" content="#333899">
     <title>Finance Manager</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-        
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        .content-wrapper {
-            flex: 1 0 auto;
-        }
-        
-        body, h1, h2, h3, h4, h5, h6, p, a, span, input, button {
-            font-family: 'Poppins', sans-serif;
-        }
-        /* Dark mode custom styles */
-        [data-bs-theme="dark"] {
-            --bs-body-bg: #212529;
-            --bs-body-color: #f8f9fa;
-        }
-        [data-bs-theme="dark"] .card {
-            background-color: #2c3034;
-            border-color: #495057;
-        }
-        [data-bs-theme="dark"] .table {
-            color: #e9ecef;
-        }
-        [data-bs-theme="dark"] .form-control,
-        [data-bs-theme="dark"] .form-select {
-            background-color: #2c3034;
-            border-color: #495057;
-            color: #e9ecef;
-        }
-        .theme-switch {
-            cursor: pointer;
-        }
-        
-        /* Purple gradient navbar */
-        .navbar {
-            background: linear-gradient(135deg, #333899, #9370DB,blue) !important;
-            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.4);
-        }
-        
-        /* Ensure text is visible on purple gradient */
-        .navbar-dark .navbar-nav .nav-link,
-        .navbar-dark .navbar-brand {
-            color: white;
-            font-weight: 500;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        
-        .navbar-dark .navbar-nav .nav-link:hover {
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        /* Footer styles */
-        .footer {
-            background: linear-gradient(135deg, #333899, #9370DB, #6a5acd);
-            color: white;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            flex-shrink: 0;
-            width: 100%;
-        }
-        
-        [data-bs-theme="dark"] .footer {
-            background: linear-gradient(135deg, #333899, #5d4bb6, #45389c);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .footer a {
-            color: rgba(255, 255, 255, 0.85) !important;
-        }
-        
-        .footer a:hover {
-            color: white !important;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .footer .text-muted {
-            color: rgba(255, 255, 255, 0.7) !important;
-        }
-        
-        .footer .social-icon {
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-        }
-        
-        .footer .social-icon:hover {
-            transform: translateY(-3px);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-        }
-        
-        .footer hr {
-            opacity: 0.1;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold fs-4 text-gradient" href="{{ url_for('auth.home') }}">
+            <a class="navbar-brand fw-bold fs-4 text-gradient" href="{{ url_for('main.index') }}">
                 <i class="bi bi-piggy-bank-fill me-2"></i>Finance Tracker
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            </button><div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
-                        
-                        <!-- Transactions & Budget Dropdown -->
+                          <!-- All Features Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="transactionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Transactions & Budget
+                            <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-grid-3x3-gap-fill"></i> Features
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="transactionDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('transactions.filter_transactions') }}">Transactions</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('budgets.set_budget') }}">Set Budget</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('transactions.add_transaction') }}">Add Transaction</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end features-menu" aria-labelledby="featuresDropdown">
+                                <!-- Transactions & Budget Section -->
+                                <li><h6 class="dropdown-header">Transactions & Budget</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.filter_transactions') }}">
+                                    <i class="bi bi-list-ul me-2"></i>Transactions
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('budgets.set_budget') }}">
+                                    <i class="bi bi-sliders me-2"></i>Set Budget
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.add_transaction') }}">
+                                    <i class="bi bi-plus-square me-2"></i>Add Transaction
+                                </a></li>                                <li><a class="dropdown-item" href="{{ url_for('transactions.budget_summary') }}">
+                                    <i class="bi bi-pie-chart me-2"></i>Budget Summary
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('transactions.transaction_report') }}">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Reports & Export
+                                </a></li>
+                                
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('transactions.budget_summary') }}">Budget Summary</a></li>
-                            </ul>
-                        </li>
-                        
-                        <!-- Goals Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="goalsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Goals
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="goalsDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('goals.add_goal') }}">Add Goal</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('goals.view_goals') }}">View Goals</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('goals.goal_suggestions') }}">Goal Suggestions</a></li>
-                            </ul>
-                        </li>
-                        
-                        <!-- Investments Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="investmentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Investments
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="investmentsDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('investments.investment_dashboard') }}">Investment Dashboard</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('investments.add_account') }}">Add Investment Account</a></li>
+                                
+                                <!-- Goals Section -->
+                                <li><h6 class="dropdown-header">Goals</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.add_goal') }}">
+                                    <i class="bi bi-trophy me-2"></i>Add Goal
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.view_goals') }}">
+                                    <i class="bi bi-list-check me-2"></i>View Goals
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('goals.goal_suggestions') }}">
+                                    <i class="bi bi-lightbulb me-2"></i>Goal Suggestions
+                                </a></li>
+                                
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('investments.portfolio_performance') }}">Portfolio Performance</a></li>
-                            </ul>
-                        </li>
-                        
-                        <!-- Debt Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="debtDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Debts & Loans
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="debtDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('debts.view_debts') }}">View All Debts</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('debts.add_debt') }}">Add New Debt/Loan</a></li>
+                                
+                                <!-- Investments Section -->
+                                <li><h6 class="dropdown-header">Investments</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('investments.investment_dashboard') }}">
+                                    <i class="bi bi-bar-chart me-2"></i>Investment Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('investments.add_account') }}">
+                                    <i class="bi bi-wallet me-2"></i>Add Investment Account
+                                </a></li>                                <li><a class="dropdown-item" href="{{ url_for('investments.portfolio_performance') }}">
+                                    <i class="bi bi-graph-up me-2"></i>Portfolio Performance
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('investments.tax_optimization') }}">
+                                    <i class="bi bi-cash-coin me-2"></i>Tax Optimizer
+                                </a></li>
+                                
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('debts.debt_history') }}">Payment History</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('debts.debt_reminder') }}">Reminders</a></li>
+                                
+                                <!-- Debt Section -->
+                                <li><h6 class="dropdown-header">Debts & Loans</h6></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.view_debts') }}">
+                                    <i class="bi bi-cash-coin me-2"></i>View All Debts
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.add_debt') }}">
+                                    <i class="bi bi-plus-circle me-2"></i>Add New Debt/Loan
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.debt_history') }}">
+                                    <i class="bi bi-clock-history me-2"></i>Payment History
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('debts.debt_reminder') }}">
+                                    <i class="bi bi-bell me-2"></i>Reminders
+                                </a></li>
                             </ul>
                         </li>
                         
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
@@ -197,7 +114,7 @@
     </nav>
 
     <div class="content-wrapper">
-        <div class="container mt-4">
+        <div class="container mt-4 mb-5">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -208,9 +125,8 @@
 
             {% block content %}{% endblock %}
         </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/responsive.js') }}"></script>
 
     <script>
         // Consolidated DOMContentLoaded event listener
@@ -309,7 +225,7 @@
     </script>
 
     <!-- Footer -->
-    <footer class="footer py-3">
+    <footer class="footer py-4 mt-auto">
         <div class="container">
             <div class="row align-items-center">
                 <!-- Logo and copyright -->

@@ -24,3 +24,6 @@ Pillow==10.2.0
 requests==2.31.0
 python-dotenv==1.0.1
 Flask-Mail==0.9.1
+reportlab==4.1.0
+pandas==2.2.0
+numpy==1.26.4

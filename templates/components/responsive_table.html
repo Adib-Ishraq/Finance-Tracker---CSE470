@@ -1,0 +1,96 @@
+{% macro responsive_transaction_table(transactions) %}
+<div class="table-responsive custom-scrollbar">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th class="text-end">Amount</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+                <tr>
+                    <td data-label="Date">{{ transaction.date.strftime('%b %d, %Y') }}</td>
+                    <td data-label="Type">
+                        <span class="badge bg-{{ 'success' if transaction.type == 'Income' else 'danger' }} text-white">
+                            {{ transaction.type }}
+                        </span>
+                    </td>
+                    <td data-label="Category">{{ transaction.category }}</td>
+                    <td data-label="Description" class="text-truncate" style="max-width: 200px;">
+                        {{ transaction.description or '-' }}
+                    </td>
+                    <td data-label="Amount" class="text-end text-{{ 'success' if transaction.type == 'Income' else 'danger' }}">
+                        ${{ "%.2f"|format(transaction.amount) }}
+                    </td>
+                    <td data-label="Actions" class="text-center">
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('transactions.edit_transaction', transaction_id=transaction.id) }}" 
+                               class="btn btn-sm btn-outline-primary touch-target">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger touch-target delete-transaction" 
+                                    data-id="{{ transaction.id }}" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                        No transactions found for the selected period
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Mobile transaction list for small screens only -->
+<div class="d-md-none">
+    {% for transaction in transactions %}
+        <div class="card mb-2 responsive-card">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="badge bg-{{ 'success' if transaction.type == 'Income' else 'danger' }} text-white">
+                            {{ transaction.type }}
+                        </span>
+                        <small class="text-muted ms-2">{{ transaction.date.strftime('%b %d') }}</small>
+                    </div>
+                    <span class="text-{{ 'success' if transaction.type == 'Income' else 'danger' }} fw-bold">
+                        ${{ "%.2f"|format(transaction.amount) }}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold">{{ transaction.category }}</div>
+                        <small class="text-muted">{{ transaction.description|truncate(30) or '-' }}</small>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('transactions.edit_transaction', transaction_id=transaction.id) }}" 
+                           class="btn btn-sm btn-outline-primary me-1 touch-target">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger touch-target delete-transaction" 
+                                data-id="{{ transaction.id }}" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+            No transactions found for the selected period
+        </div>
+    {% endfor %}
+</div>
+{% endmacro %}

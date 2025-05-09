@@ -40,10 +40,15 @@ def create_app(config_class=Config):
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
-    
-    # Register blueprints
+      # Register blueprints
     register_blueprints(app)
     
+    # Register custom template filters
+    @app.template_filter('month_abbr')
+    def month_abbr_filter(month_number):
+        import calendar
+        return calendar.month_abbr[month_number]
+  
     return app
 
 if __name__ == '__main__':

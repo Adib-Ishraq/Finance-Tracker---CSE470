@@ -1,0 +1,141 @@
+/**
+ * Finance Tracker - Theme Utilities
+ * This file contains theme-specific utility classes
+ */
+
+/* Text colors */
+.text-primary-gradient {
+    background: linear-gradient(135deg, #333899, #9370DB);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.text-emphasis {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Background colors and gradients */
+.bg-primary-gradient {
+    background: linear-gradient(135deg, #333899, #9370DB);
+}
+
+.bg-subtle {
+    background-color: rgba(147, 112, 219, 0.1);
+}
+
+.bg-subtle-success {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.bg-subtle-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.bg-subtle-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Dark mode specific utilities */
+[data-bs-theme="dark"] .dark-invert {
+    filter: invert(1);
+}
+
+[data-bs-theme="dark"] .dark-higher-contrast {
+    color: white !important;
+}
+
+/* Border utilities */
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+.border-top-primary {
+    border-top: 3px solid var(--primary-color) !important;
+}
+
+.border-left-primary {
+    border-left: 3px solid var(--primary-color) !important;
+}
+
+.border-accent-success {
+    border-left: 3px solid var(--success-color);
+}
+
+.border-accent-warning {
+    border-left: 3px solid var(--warning-color);
+}
+
+.border-accent-danger {
+    border-left: 3px solid var(--danger-color);
+}
+
+/* Box shadows */
+.shadow-sm-hover {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.shadow-sm-hover:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+    transform: translateY(-2px);
+}
+
+.shadow-primary {
+    box-shadow: 0 .5rem 1rem rgba(147, 112, 219, 0.3) !important;
+}
+
+.shadow-success {
+    box-shadow: 0 .5rem 1rem rgba(40, 167, 69, 0.3) !important;
+}
+
+.shadow-warning {
+    box-shadow: 0 .5rem 1rem rgba(255, 193, 7, 0.3) !important;
+}
+
+.shadow-danger {
+    box-shadow: 0 .5rem 1rem rgba(220, 53, 69, 0.3) !important;
+}
+
+/* Opacity utilities */
+.opacity-90 { opacity: 0.9 !important; }
+.opacity-80 { opacity: 0.8 !important; }
+.opacity-70 { opacity: 0.7 !important; }
+.opacity-60 { opacity: 0.6 !important; }
+.opacity-50 { opacity: 0.5 !important; }
+.opacity-40 { opacity: 0.4 !important; }
+.opacity-30 { opacity: 0.3 !important; }
+.opacity-20 { opacity: 0.2 !important; }
+.opacity-10 { opacity: 0.1 !important; }
+
+/* Hover effects */
+.hover-lift {
+    transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.hover-shadow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.15) !important;
+}
+
+.hover-primary {
+    transition: color 0.3s ease;
+}
+
+.hover-primary:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Focus styles */
+.focus-none:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}

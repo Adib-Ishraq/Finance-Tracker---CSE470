@@ -1,0 +1,110 @@
+/**
+ * Finance Tracker - Spacing Utilities
+ * This file contains spacing-related utility classes
+ */
+
+/* Margin and Padding Variable Classes
+   Usage examples:
+   - m-1 through m-5: margin with predefined sizes
+   - mt-1 through mt-5: margin-top with predefined sizes
+   - mb-1 through mb-5: margin-bottom with predefined sizes
+   - p-1 through p-5: padding with predefined sizes
+   - pt-1 through pt-5: padding-top with predefined sizes
+   - etc.
+*/
+
+/* Custom spacers beyond Bootstrap's defaults */
+.m-6 { margin: 4rem !important; }
+.mt-6 { margin-top: 4rem !important; }
+.mb-6 { margin-bottom: 4rem !important; }
+.ms-6 { margin-left: 4rem !important; }
+.me-6 { margin-right: 4rem !important; }
+
+.p-6 { padding: 4rem !important; }
+.pt-6 { padding-top: 4rem !important; }
+.pb-6 { padding-bottom: 4rem !important; }
+.ps-6 { padding-left: 4rem !important; }
+.pe-6 { padding-right: 4rem !important; }
+
+/* Extra large spacing */
+.m-7 { margin: 5rem !important; }
+.mt-7 { margin-top: 5rem !important; }
+.mb-7 { margin-bottom: 5rem !important; }
+.ms-7 { margin-left: 5rem !important; }
+.me-7 { margin-right: 5rem !important; }
+
+.p-7 { padding: 5rem !important; }
+.pt-7 { padding-top: 5rem !important; }
+.pb-7 { padding-bottom: 5rem !important; }
+.ps-7 { padding-left: 5rem !important; }
+.pe-7 { padding-right: 5rem !important; }
+
+/* Specific frequently-used spacings */
+.mt-half { margin-top: 0.25rem !important; }
+.mb-half { margin-bottom: 0.25rem !important; }
+
+/* Responsive Spacing */
+@media (max-width: 767.98px) {
+    /* Mobile specific spacings */
+    .m-sm-0 { margin: 0 !important; }
+    .mt-sm-0 { margin-top: 0 !important; }
+    .mb-sm-0 { margin-bottom: 0 !important; }
+    .ms-sm-0 { margin-left: 0 !important; }
+    .me-sm-0 { margin-right: 0 !important; }
+    
+    .m-sm-auto { margin: auto !important; }
+    
+    .p-sm-0 { padding: 0 !important; }
+    .pt-sm-0 { padding-top: 0 !important; }
+    .pb-sm-0 { padding-bottom: 0 !important; }
+    .ps-sm-0 { padding-left: 0 !important; }
+    .pe-sm-0 { padding-right: 0 !important; }
+    
+    /* Reduced spacing on mobile */
+    .m-sm-1 { margin: 0.25rem !important; }
+    .m-sm-2 { margin: 0.5rem !important; }
+    .m-sm-3 { margin: 1rem !important; }
+    
+    .mt-sm-1 { margin-top: 0.25rem !important; }
+    .mt-sm-2 { margin-top: 0.5rem !important; }
+    .mt-sm-3 { margin-top: 1rem !important; }
+    
+    .mb-sm-1 { margin-bottom: 0.25rem !important; }
+    .mb-sm-2 { margin-bottom: 0.5rem !important; }
+    .mb-sm-3 { margin-bottom: 1rem !important; }
+    
+    .p-sm-1 { padding: 0.25rem !important; }
+    .p-sm-2 { padding: 0.5rem !important; }
+    .p-sm-3 { padding: 1rem !important; }
+    
+    .pt-sm-1 { padding-top: 0.25rem !important; }
+    .pt-sm-2 { padding-top: 0.5rem !important; }
+    .pt-sm-3 { padding-top: 1rem !important; }
+    
+    .pb-sm-1 { padding-bottom: 0.25rem !important; }
+    .pb-sm-2 { padding-bottom: 0.5rem !important; }
+    .pb-sm-3 { padding-bottom: 1rem !important; }
+}
+
+/* Gap utilities for flex and grid layouts */
+.gap-0 { gap: 0 !important; }
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+.gap-5 { gap: 3rem !important; }
+
+/* Row and column gaps */
+.row-gap-0 { row-gap: 0 !important; }
+.row-gap-1 { row-gap: 0.25rem !important; }
+.row-gap-2 { row-gap: 0.5rem !important; }
+.row-gap-3 { row-gap: 1rem !important; }
+.row-gap-4 { row-gap: 1.5rem !important; }
+.row-gap-5 { row-gap: 3rem !important; }
+
+.column-gap-0 { column-gap: 0 !important; }
+.column-gap-1 { column-gap: 0.25rem !important; }
+.column-gap-2 { column-gap: 0.5rem !important; }
+.column-gap-3 { column-gap: 1rem !important; }
+.column-gap-4 { column-gap: 1.5rem !important; }
+.column-gap-5 { column-gap: 3rem !important; }

@@ -1,0 +1,640 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .comparison-card {
+        border-radius: 10px;
+        transition: transform 0.2s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .comparison-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .text-increase {
+        color: #28a745;
+    }
+    
+    .text-decrease {
+        color: #dc3545;
+    }
+    
+    .icon-change {
+        font-size: 1.2rem;
+        margin-right: 5px;
+    }
+    
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+    
+    .category-change {
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
+    }
+    
+    .category-change:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .category-increase {
+        border-left-color: #dc3545;
+    }
+    
+    .category-decrease {
+        border-left-color: #28a745;
+    }
+    
+    .category-same {
+        border-left-color: #6c757d;
+    }
+      /* Calendar Month Picker Styles */
+    .month-picker .month-btn {
+        height: 32px;
+        font-size: 0.7rem;
+        padding: 0.15rem 0;
+        transition: all 0.2s ease;
+        margin: 0;
+    }
+    
+    .month-picker .month-btn:hover {
+        transform: scale(1.05);
+        z-index: 2;
+    }
+    
+    .month-picker .month-btn.active {
+        font-weight: bold;
+        border-width: 2px;
+        box-shadow: 0 0 0 0.15rem rgba(0,123,255,.25);
+        background-color: #e6f2ff;
+    }
+    
+    .comparison-pill {
+        border-radius: 20px;
+        padding: 5px 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Monthly Comparison</h2>
+            <p class="lead">
+                Comparing {{ comparison_data.first_month_name }} {{ comparison_data.first_month.year }} with 
+                {{ comparison_data.second_month_name }} {{ comparison_data.second_month.year }}
+            </p>
+        </div>
+    </div>
+      <!-- Month Selection -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Select Months to Compare</h5>
+        </div>
+        <div class="card-body">
+            <form id="compareForm" class="row g-3">
+                <div class="col-md-5">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            First Month
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="prevYear1">
+                                    <i class="bi bi-chevron-left"></i> Year
+                                </button>
+                                <span class="h5" id="yearDisplay1">{{ selected_year1 }}</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="nextYear1">
+                                    Year <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                              <div class="row row-cols-6 g-1 month-picker" id="monthPicker1">
+                                {% for i in range(1, 13) %}
+                                <div class="col">
+                                    <button type="button" 
+                                            class="btn btn-outline-primary w-100 month-btn {% if i == selected_month1 %}active{% endif %}" 
+                                            data-month="{{ i }}">
+                                        {{ i|month_abbr }}
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <input type="hidden" name="month1" id="month1Input" value="{{ selected_month1 }}">
+                            <input type="hidden" name="year1" id="year1Input" value="{{ selected_year1 }}">
+                            
+                            <div class="alert alert-info mt-3 mb-0 text-center">
+                                Selected: <strong id="selectedDate1">{{ comparison_data.first_month_name }} {{ selected_year1 }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            Second Month
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="prevYear2">
+                                    <i class="bi bi-chevron-left"></i> Year
+                                </button>
+                                <span class="h5" id="yearDisplay2">{{ selected_year2 }}</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="nextYear2">
+                                    Year <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="row row-cols-3 g-3 month-picker" id="monthPicker2">
+                                {% for i in range(1, 13) %}
+                                <div class="col">
+                                    <button type="button" 
+                                            class="btn btn-outline-success w-100 month-btn {% if i == selected_month2 %}active{% endif %}" 
+                                            data-month="{{ i }}">
+                                        {{ i|month_abbr }}
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <input type="hidden" name="month2" id="month2Input" value="{{ selected_month2 }}">
+                            <input type="hidden" name="year2" id="year2Input" value="{{ selected_year2 }}">
+                            
+                            <div class="alert alert-success mt-3 mb-0 text-center">
+                                Selected: <strong id="selectedDate2">{{ comparison_data.second_month_name }} {{ selected_year2 }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 py-3">
+                        <i class="bi bi-bar-chart"></i><br>
+                        Compare<br>Months
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card comparison-card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Budget Change</h5>
+                    <h3>
+                        {% set budget_diff = comparison_data.second_month.total_budget - comparison_data.first_month.total_budget %}
+                        {% if budget_diff > 0 %}
+                            <span class="text-increase">
+                                <i class="bi bi-arrow-up icon-change"></i>+{{ "%.2f"|format(budget_diff) }}
+                            </span>
+                        {% elif budget_diff < 0 %}
+                            <span class="text-decrease">
+                                <i class="bi bi-arrow-down icon-change"></i>{{ "%.2f"|format(budget_diff) }}
+                            </span>
+                        {% else %}
+                            <span><i class="bi bi-dash"></i> No change</span>
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <small>{{ comparison_data.first_month_name }}: ${{ "%.2f"|format(comparison_data.first_month.total_budget) }}</small>
+                        <small>{{ comparison_data.second_month_name }}: ${{ "%.2f"|format(comparison_data.second_month.total_budget) }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card comparison-card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Income Change</h5>
+                    <h3>
+                        {% if comparison_data.income_difference > 0 %}
+                            <span class="text-increase">
+                                <i class="bi bi-arrow-up icon-change"></i>+{{ "%.2f"|format(comparison_data.income_difference) }}
+                            </span>
+                        {% elif comparison_data.income_difference < 0 %}
+                            <span class="text-decrease">
+                                <i class="bi bi-arrow-down icon-change"></i>{{ "%.2f"|format(comparison_data.income_difference) }}
+                            </span>
+                        {% else %}
+                            <span><i class="bi bi-dash"></i> No change</span>
+                        {% endif %}
+                    </h3>
+                    <p>{{ "%.1f"|format(comparison_data.income_percent_change) }}% change</p>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <small>{{ comparison_data.first_month_name }}: ${{ "%.2f"|format(comparison_data.first_month.monthly_totals.income) }}</small>
+                        <small>{{ comparison_data.second_month_name }}: ${{ "%.2f"|format(comparison_data.second_month.monthly_totals.income) }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card comparison-card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Expense Change</h5>
+                    <h3>
+                        {% if comparison_data.expense_difference > 0 %}
+                            <span class="text-decrease">
+                                <i class="bi bi-arrow-up icon-change"></i>+{{ "%.2f"|format(comparison_data.expense_difference) }}
+                            </span>
+                        {% elif comparison_data.expense_difference < 0 %}
+                            <span class="text-increase">
+                                <i class="bi bi-arrow-down icon-change"></i>{{ "%.2f"|format(comparison_data.expense_difference) }}
+                            </span>
+                        {% else %}
+                            <span><i class="bi bi-dash"></i> No change</span>
+                        {% endif %}
+                    </h3>
+                    <p>{{ "%.1f"|format(comparison_data.expense_percent_change) }}% change</p>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <small>{{ comparison_data.first_month_name }}: ${{ "%.2f"|format(comparison_data.first_month.monthly_totals.expenses) }}</small>
+                        <small>{{ comparison_data.second_month_name }}: ${{ "%.2f"|format(comparison_data.second_month.monthly_totals.expenses) }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card comparison-card h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Savings Change</h5>
+                    {% set first_savings = comparison_data.first_month.monthly_totals.income - comparison_data.first_month.monthly_totals.expenses %}
+                    {% set second_savings = comparison_data.second_month.monthly_totals.income - comparison_data.second_month.monthly_totals.expenses %}
+                    {% set savings_diff = second_savings - first_savings %}
+                    <h3>
+                        {% if savings_diff > 0 %}
+                            <span class="text-increase">
+                                <i class="bi bi-arrow-up icon-change"></i>+{{ "%.2f"|format(savings_diff) }}
+                            </span>
+                        {% elif savings_diff < 0 %}
+                            <span class="text-decrease">
+                                <i class="bi bi-arrow-down icon-change"></i>{{ "%.2f"|format(savings_diff) }}
+                            </span>
+                        {% else %}
+                            <span><i class="bi bi-dash"></i> No change</span>
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <small>{{ comparison_data.first_month_name }}: ${{ "%.2f"|format(first_savings) }}</small>
+                        <small>{{ comparison_data.second_month_name }}: ${{ "%.2f"|format(second_savings) }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Comparison -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card comparison-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Expense Comparison by Category</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="categoryComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Category Comparison -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card comparison-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Category Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>{{ comparison_data.first_month_name }} {{ comparison_data.first_month.year }}</th>
+                                <th>{{ comparison_data.second_month_name }} {{ comparison_data.second_month.year }}</th>
+                                <th>Change</th>
+                                <th>% Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in comparison_data.category_comparison %}
+                                <tr class="category-change {% if cat.difference > 0 %}category-increase{% elif cat.difference < 0 %}category-decrease{% else %}category-same{% endif %}">
+                                    <td><strong>{{ cat.category }}</strong></td>
+                                    <td>${{ "%.2f"|format(cat.first_amount) }}</td>
+                                    <td>${{ "%.2f"|format(cat.second_amount) }}</td>
+                                    <td>
+                                        {% if cat.difference > 0 %}
+                                            <span class="text-danger">+${{ "%.2f"|format(cat.difference) }}</span>
+                                        {% elif cat.difference < 0 %}
+                                            <span class="text-success">-${{ "%.2f"|format(cat.difference|abs) }}</span>
+                                        {% else %}
+                                            <span class="text-muted">$0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge comparison-pill {% if cat.percent_change > 0 %}bg-danger{% elif cat.percent_change < 0 %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if cat.percent_change > 0 %}
+                                                +{{ "%.1f"|format(cat.percent_change) }}%
+                                            {% elif cat.percent_change < 0 %}
+                                                {{ "%.1f"|format(cat.percent_change) }}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary & Insights -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card comparison-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Month-to-Month Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Financial Performance</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Income Growth</span>
+                                    <span class="badge {% if comparison_data.income_percent_change >= 0 %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                        {{ "%.1f"|format(comparison_data.income_percent_change) }}%
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Expense Growth</span>
+                                    <span class="badge {% if comparison_data.expense_percent_change <= 0 %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                        {{ "%.1f"|format(comparison_data.expense_percent_change) }}%
+                                    </span>
+                                </li>
+                                {% set first_savings_rate = (comparison_data.first_month.monthly_totals.income - comparison_data.first_month.monthly_totals.expenses) / comparison_data.first_month.monthly_totals.income * 100 if comparison_data.first_month.monthly_totals.income > 0 else 0 %}
+                                {% set second_savings_rate = (comparison_data.second_month.monthly_totals.income - comparison_data.second_month.monthly_totals.expenses) / comparison_data.second_month.monthly_totals.income * 100 if comparison_data.second_month.monthly_totals.income > 0 else 0 %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Savings Rate</span>
+                                    <div>
+                                        <span class="badge bg-secondary rounded-pill me-2">{{ "%.1f"|format(first_savings_rate) }}% → {{ "%.1f"|format(second_savings_rate) }}%</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Budget Utilization</h5>
+                            <ul class="list-group list-group-flush">
+                                {% set first_utilization = comparison_data.first_month.monthly_totals.expenses / comparison_data.first_month.total_budget * 100 if comparison_data.first_month.total_budget > 0 else 0 %}
+                                {% set second_utilization = comparison_data.second_month.monthly_totals.expenses / comparison_data.second_month.total_budget * 100 if comparison_data.second_month.total_budget > 0 else 0 %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Budget Usage</span>
+                                    <div>
+                                        <span class="badge {% if first_utilization > 100 %}bg-danger{% elif first_utilization > 90 %}bg-warning{% else %}bg-success{% endif %} rounded-pill me-2">
+                                            {{ "%.1f"|format(first_utilization) }}%
+                                        </span>
+                                        →
+                                        <span class="badge {% if second_utilization > 100 %}bg-danger{% elif second_utilization > 90 %}bg-warning{% else %}bg-success{% endif %} rounded-pill ms-2">
+                                            {{ "%.1f"|format(second_utilization) }}%
+                                        </span>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Budget Rollover</span>
+                                    <span>
+                                        {% if comparison_data.first_month.budget.enable_rollover and comparison_data.second_month.budget.enable_rollover %}
+                                            <span class="badge bg-success rounded-pill">Both months enabled</span>
+                                        {% elif comparison_data.first_month.budget.enable_rollover or comparison_data.second_month.budget.enable_rollover %}
+                                            <span class="badge bg-warning rounded-pill">Changed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill">Both months disabled</span>
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Rollover Amount</span>
+                                    <div>
+                                        <span class="badge bg-secondary rounded-pill">
+                                            ${{ "%.2f"|format(comparison_data.first_month.budget.rollover_amount) }}
+                                            →
+                                            ${{ "%.2f"|format(comparison_data.second_month.budget.rollover_amount) }}
+                                        </span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+        <a href="{{ url_for('budgets.monthly_budget', month=comparison_data.second_month.monthly_totals.month, year=comparison_data.second_month.monthly_totals.year) }}" class="btn btn-primary">
+            View Current Month <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Month names array for display
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        // Month picker 1 (First Month)
+        const month1Input = document.getElementById('month1Input');
+        const year1Input = document.getElementById('year1Input');
+        const yearDisplay1 = document.getElementById('yearDisplay1');
+        const selectedDate1 = document.getElementById('selectedDate1');
+        const monthPicker1 = document.getElementById('monthPicker1');
+        const prevYear1 = document.getElementById('prevYear1');
+        const nextYear1 = document.getElementById('nextYear1');
+        
+        // Month picker 2 (Second Month)
+        const month2Input = document.getElementById('month2Input');
+        const year2Input = document.getElementById('year2Input');
+        const yearDisplay2 = document.getElementById('yearDisplay2');
+        const selectedDate2 = document.getElementById('selectedDate2');
+        const monthPicker2 = document.getElementById('monthPicker2');
+        const prevYear2 = document.getElementById('prevYear2');
+        const nextYear2 = document.getElementById('nextYear2');
+        
+        // Initialize current dates
+        let currentMonth1 = parseInt(month1Input.value);
+        let currentYear1 = parseInt(year1Input.value);
+        let currentMonth2 = parseInt(month2Input.value);
+        let currentYear2 = parseInt(year2Input.value);
+        
+        // Functions to update the year display
+        function updateYearDisplay1() {
+            yearDisplay1.textContent = currentYear1;
+        }
+        
+        function updateYearDisplay2() {
+            yearDisplay2.textContent = currentYear2;
+        }
+        
+        // Functions to update the selected date display
+        function updateSelectedDate1() {
+            selectedDate1.textContent = `${monthNames[currentMonth1-1]} ${currentYear1}`;
+        }
+        
+        function updateSelectedDate2() {
+            selectedDate2.textContent = `${monthNames[currentMonth2-1]} ${currentYear2}`;
+        }
+        
+        // Handle year navigation for first month
+        prevYear1.addEventListener('click', function() {
+            currentYear1--;
+            updateYearDisplay1();
+            year1Input.value = currentYear1;
+            updateSelectedDate1();
+        });
+        
+        nextYear1.addEventListener('click', function() {
+            currentYear1++;
+            updateYearDisplay1();
+            year1Input.value = currentYear1;
+            updateSelectedDate1();
+        });
+        
+        // Handle year navigation for second month
+        prevYear2.addEventListener('click', function() {
+            currentYear2--;
+            updateYearDisplay2();
+            year2Input.value = currentYear2;
+            updateSelectedDate2();
+        });
+        
+        nextYear2.addEventListener('click', function() {
+            currentYear2++;
+            updateYearDisplay2();
+            year2Input.value = currentYear2;
+            updateSelectedDate2();
+        });
+        
+        // Handle month selection for first month
+        monthPicker1.querySelectorAll('.month-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                monthPicker1.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMonth1 = parseInt(this.dataset.month);
+                month1Input.value = currentMonth1;
+                updateSelectedDate1();
+            });
+        });
+        
+        // Handle month selection for second month
+        monthPicker2.querySelectorAll('.month-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                monthPicker2.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMonth2 = parseInt(this.dataset.month);
+                month2Input.value = currentMonth2;
+                updateSelectedDate2();
+            });
+        });
+        
+        // Initialize displays
+        updateYearDisplay1();
+        updateYearDisplay2();
+        updateSelectedDate1();
+        updateSelectedDate2();
+        
+        // Prepare category comparison chart
+        const categoryComparisonCtx = document.getElementById('categoryComparisonChart').getContext('2d');
+        
+        // Prepare data from template variables
+        const categories = [];
+        const firstMonthData = [];
+        const secondMonthData = [];
+        
+        {% for cat in comparison_data.category_comparison %}
+            categories.push("{{ cat.category }}");
+            firstMonthData.push({{ cat.first_amount }});
+            secondMonthData.push({{ cat.second_amount }});
+        {% endfor %}
+        
+        const categoryComparisonChart = new Chart(categoryComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [
+                    {
+                        label: '{{ comparison_data.first_month_name }} {{ comparison_data.first_month.year }}',
+                        data: firstMonthData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '{{ comparison_data.second_month_name }} {{ comparison_data.second_month.year }}',
+                        data: secondMonthData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount ($)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Categories'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Category Expense Comparison'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + context.raw.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
